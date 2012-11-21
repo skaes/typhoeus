@@ -224,11 +224,12 @@ describe Typhoeus::Hydra do
     end
 
     first  = Typhoeus::Request.new("http://localhost:3000/foo", :params => {:delay => 1})
-    @cache.set(first.cache_key, :foo, 60)
+    cached_response = stub("foo", :code => 200)
+    @cache.set(first.cache_key, cached_response, 60)
     hydra.queue first
     hydra.run
     (Time.now - start_time).should < 0.1
-    first.response.should == :foo
+    first.response.should == cached_response
   end
 
   it "sets GET responses to cache when the request has a cache_timeout value" do
@@ -264,14 +265,15 @@ describe Typhoeus::Hydra do
     first  = Typhoeus::Request.new("http://localhost:3000/first", :params => {:delay => 1})
     second = Typhoeus::Request.new("http://localhost:3000/second", :params => {:delay => 1})
     third = Typhoeus::Request.new("http://localhost:3000/third", :params => {:delay => 1})
-    @cache.set(second.cache_key, "second", 60)
+    second_response = stub("second", :code => 200)
+    @cache.set(second.cache_key, second_response, 60)
     hydra.queue first
     hydra.queue second
     hydra.queue third
     hydra.run
 
     first.response.body.should include("first")
-    second.response.should == "second"
+    second.response.should == second_response
     third.response.body.should include("third")
   end
 

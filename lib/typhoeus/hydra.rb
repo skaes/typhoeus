@@ -8,12 +8,15 @@ module Typhoeus
     include Stubbing
     extend Callbacks
 
+    attr_accessor :retry_codes
+
     def initialize(options = {})
       @memoize_requests = true
       @multi       = Multi.new
       @easy_pool   = []
       initial_pool_size = options[:initial_pool_size] || 10
       @max_concurrency = options[:max_concurrency] || 200
+      @retry_codes = options[:retry_codes] || []
       initial_pool_size.times { @easy_pool << Easy.new }
       @memoized_requests = {}
       @retrieved_from_cache = {}
@@ -109,6 +112,10 @@ module Typhoeus
 
     def disable_memoization
       @memoize_requests = false
+    end
+
+    def enable_memoization
+      @memoize_requests = true
     end
 
     def cache_getter(&block)
@@ -214,7 +221,30 @@ module Typhoeus
     end
     private :release_easy_object
 
+    def disable_retry
+      @retry_codes = []
+      self
+    end
+
+    def retry_request?(request, response)
+      :get == request.method &&
+      retry_codes.include?(response.code) &&
+      !request.requeued? &&
+      request.retry?
+    end
+
+    def retry_request(request)
+      get_from_cache_or_queue(request)
+      request.mark_requeued
+      request.call_retry_handler
+    end
+
     def handle_request(request, response, live_request = true)
+      if retry_request?(request, response)
+        retry_request(request)
+        return
+      end
+
       request.response = response
       @completed_requests[request.url] = request if @memoize_requests
 

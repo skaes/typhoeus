@@ -11,7 +11,8 @@ module Typhoeus
                   :ssl_cert, :ssl_cert_type, :ssl_key, :ssl_key_type,
                   :ssl_key_password, :ssl_cacert, :ssl_capath, :verbose,
                   :username, :password, :auth_method, :user_agent,
-                  :proxy_auth_method, :proxy_type
+                  :proxy_auth_method, :proxy_type, :attempt_retry
+
 
     # Initialize a new Request
     #
@@ -43,6 +44,7 @@ module Typhoeus
     # ** +:username
     # ** +:password
     # ** +:auth_method
+    # ** +:retry+ : retry on 503 or 504 (true|false)
     #
     def initialize(url, options = {})
       @method           = options[:method] || :get
@@ -74,6 +76,7 @@ module Typhoeus
       @username         = options[:username]
       @password         = options[:password]
       @auth_method      = options[:auth_method]
+      @attempt_retry    = !options.has_key?(:retry) || options[:retry]
 
       if @method == :post
         @url = url
@@ -84,6 +87,7 @@ module Typhoeus
       @parsed_uri = URI.parse(@url)
 
       @on_complete      = nil
+      @on_retry         = nil
       @after_complete   = nil
       @handled_response = nil
     end
@@ -118,6 +122,14 @@ module Typhoeus
       Typhoeus::Utils.traversal_to_param_string(traversal)
     end
 
+    def on_retry(&block)
+      @on_retry = block
+    end
+
+    def on_retry=(proc)
+      @on_retry = proc
+    end
+
     def on_complete(&block)
       @on_complete = block
     end
@@ -132,6 +144,10 @@ module Typhoeus
 
     def after_complete=(proc)
       @after_complete = proc
+    end
+
+    def call_retry_handler
+      @on_retry.call(response) if @on_retry
     end
 
     def call_handlers
@@ -173,6 +189,18 @@ module Typhoeus
 
     def cache_key
       Digest::SHA1.hexdigest(url)
+    end
+
+    def requeued?
+      @has_been_requeued
+    end
+
+    def mark_requeued
+      @has_been_requeued = true
+    end
+
+    def retry?
+      @attempt_retry
     end
 
     def self.run(url, params)

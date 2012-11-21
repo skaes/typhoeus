@@ -5,6 +5,7 @@ require 'json'
 require 'zlib'
 
 @@fail_count = 0
+@@codes_to_return = [500]
 
 post '/file' do
   {
@@ -35,6 +36,34 @@ end
 get '/bad_redirect' do
   redirect '/bad_redirect'
 end
+
+get '/flaky/set' do
+  @@codes_to_return = request.params['codes'].split(',').map(&:to_i)
+  [200, %Q{"message":"ok", "code":200, "params":#{@@codes_to_return.inspect}}]
+end
+
+def flaky_return_code
+  if @@codes_to_return.size == 1
+    @@codes_to_return.first
+  else
+    @@codes_to_return.shift
+  end
+end
+
+def be_flaky(options = {:include_body => true})
+  if options[:include_body]
+    body = request.env.merge!(:body => request.body.read).to_json
+    [flaky_return_code, body]
+  else
+    flaky_return_code
+  end
+end
+
+get('/flaky') {be_flaky}
+post('/flaky') {be_flaky}
+put('/flaky') {be_flaky}
+delete('/flaky') {be_flaky}
+head('/flaky') {be_flaky :include_body => false}
 
 get '/auth_basic/:username/:password' do
   @auth ||=  Rack::Auth::Basic::Request.new(request.env)

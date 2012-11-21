@@ -192,6 +192,42 @@ hydra.cache_getter do |request|
 end
 </pre>
 
+*Retries*
+You can have Typhoeus automatically retry requests based on their error code.
+
+<pre>
+# assuming that the server returns a 503 or 504 and then returns a 200
+hydra = Typhoeus::Hydra.new(:retry_codes => [503, 504])
+request = Typhoeus::Request.new("http://localhost:3000/users/1")
+hydra.queue request
+hydra.run
+request.response.code => 200
+</pre>
+
+You can disable retries on a per request basis:
+
+<pre>
+request = Typhoeus::Request.new("http://localhost:3000/users/1", :retry => false)
+</pre>
+
+It's also possible to change the retry set-up for a queue.
+
+<pre>
+hydra = Typhoues::Hydra.new(:retry_codes => [503, 504])
+
+# queue some requests that might be subject to 503 or 504
+
+hydra.run
+hydra.disable_retries
+
+# queue some requests that shouldn't be subject to retries
+
+hydra.run
+hydra.return_codes_to_retry(503, 504)
+
+# ...
+</pre>
+
 *Direct Stubbing*
 Hydra allows you to stub out specific urls and patters to avoid hitting remote servers while testing.
 

@@ -235,15 +235,18 @@ module Typhoeus
       request.retry?
     end
 
-    def retry_request(request)
+    # we don't have the response from the #response method on the request,
+    # because logically the response is not the final response for the request
+    # since it will be retried.
+    def retry_request(request, response)
       get_from_cache_or_queue(request)
       request.mark_requeued
-      request.call_retry_handler
+      request.call_retry_handler(response)
     end
 
     def handle_request(request, response, live_request = true)
       if retry_request?(request, response)
-        retry_request(request)
+        retry_request(request, response)
         return
       end
 

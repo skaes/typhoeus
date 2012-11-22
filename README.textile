@@ -228,6 +228,14 @@ hydra.return_codes_to_retry(503, 504)
 # ...
 </pre>
 
+If you need to know that Typhoeus has done a retry, there is a
+<tt>Typhoeus::Request#on_retry</tt> callback.
+
+<pre>
+request = Typhoeus::Request.new("http://localhost:3000/users/1")
+request.on_retry{|response| puts "I got a failure code #{response.code}" }
+</pre>
+
 *Direct Stubbing*
 Hydra allows you to stub out specific urls and patters to avoid hitting remote servers while testing.
 

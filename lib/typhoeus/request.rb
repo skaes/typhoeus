@@ -148,8 +148,8 @@ module Typhoeus
       @after_complete = proc
     end
 
-    def call_retry_handler
-      @on_retry.call(response) if @on_retry
+    def call_retry_handler(response_param)
+      @on_retry.call(response_param) if @on_retry
     end
 
     def call_handlers

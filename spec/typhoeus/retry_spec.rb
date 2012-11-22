@@ -32,12 +32,15 @@ describe Typhoeus::Request do
   end
 
   describe '#call_retry_handler' do
-    it 'should call the on_retry handler' do
+    it 'should call the on_retry handler with the request' do
       some_value = false
+      response_for_request = nil
+      response = Typhoeus::Response.new(:code => '999')
       request = Typhoeus::Request.new('url')
-      request.on_retry{ some_value = true }
-      request.call_retry_handler
+      request.on_retry{|rsp| response_for_request = rsp; some_value = true }
+      request.call_retry_handler(response)
       some_value.should == true
+      response_for_request.should == response
     end
   end
 end
@@ -166,7 +169,7 @@ describe Typhoeus::Hydra do
                 Typhoeus::Request.get("#{@flaky_prefix}/set?codes=#{code},200")
                 request = Typhoeus::Request.new("#{@flaky_prefix}?single-#{code}-success",
                                                 :method => method)
-                request.on_retry { retry_count += 1 }
+                request.on_retry {|rsp| retry_count += 1;  rsp.code.should == code }
                 request.cache_timeout = @cache_timeout
                 @hydra.queue request
                 @hydra.run
@@ -197,19 +200,19 @@ describe Typhoeus::Hydra do
           retryable_methods.each do |method|
             [503, 504].each do |code|
               it "#{method} with a single #{code} should be retried (#{memoization_state})" do
-                Typhoeus::Request.get("#{@flaky_prefix}/set?codes=503,200")
+                Typhoeus::Request.get("#{@flaky_prefix}/set?codes=#{code},200")
                 @hydra.send(memoization_state)
                 callback_count = 0
                 retry_count = 0
                 request1 = Typhoeus::Request.new("#{@flaky_prefix}?multi-request",
                                                  :method => method)
                 request1.on_complete { callback_count += 1 }
-                request1.on_retry { retry_count += 1 }
+                request1.on_retry {|rsp| retry_count += 1;  rsp.code.should == code }
                 request1.cache_timeout = @cache_timeout
                 request2 = Typhoeus::Request.new("#{@flaky_prefix}?multi-request",
                                                  :method => method)
                 request2.on_complete { callback_count += 1 }
-                request2.on_retry { retry_count += 1 }
+                request2.on_retry {|rsp| retry_count += 1;  rsp.code.should == code }
                 request1.cache_timeout = @cache_timeout
                 @hydra.queue request1
                 @hydra.queue request2

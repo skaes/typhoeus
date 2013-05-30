@@ -464,6 +464,31 @@ describe Typhoeus::Hydra::Stubbing do
       @stub_target.clear_stubs
     end
 
+    it "can clear stubs with multiple exceptions" do
+      [1,2].each do |index|
+        request = Typhoeus::Request.new("http://localhost:3000/foofoo/#{index}",
+                                        :user_agent => 'test')
+        response = Typhoeus::Response.new(:code => 404,
+                                          :headers => "whatever",
+                                          :body => "not found #{index}",
+                                          :time => 0.1)
+
+        @stub_target.stub(:get, %r[/foofoo/#{index}]).and_return(response)
+
+        request.on_complete do |response|
+          raise "got a non success response #{response.code}" unless response.code / 100 == 2
+        end
+
+        @hydra.queue(request)
+      end
+
+      expect{ @hydra.run }.to raise_exception
+
+      @hydra.clear_stubs
+
+      expect{ @hydra.run }.to_not raise_exception
+    end
+
     it "clears out previously queued requests once they are called" do
       @stub_target.stub(:get, "http://localhost:3000/asdf",
                         :headers => { 'user-agent' => 'test' }).

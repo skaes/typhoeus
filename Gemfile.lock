@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    typhoeus (0.2.4.107)
+    typhoeus (0.2.4.108)
       mime-types
 
 GEM
@@ -16,7 +16,7 @@ GEM
       rubyforge (>= 2.0.0)
     json (1.7.7)
     json_pure (1.4.6)
-    mime-types (1.19)
+    mime-types (1.23)
     rack (1.2.1)
     rake (10.0.3)
     rspec (1.3.2)

@@ -9,6 +9,7 @@ module Typhoeus
 
         def clear_stubs
           self.stubs = []
+          @active_stubs.clear if @active_stubs
         end
 
         def find_stub_from_request(request)

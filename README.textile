@@ -224,7 +224,7 @@ hydra = Typhoues::Hydra.new(:retry_codes => [503, 504])
 # queue some requests that might be subject to 503 or 504
 
 hydra.run
-hydra.disable_retries
+hydra.disable_retry
 
 # queue some requests that shouldn't be subject to retries
 

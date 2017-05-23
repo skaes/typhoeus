@@ -282,7 +282,7 @@ describe Typhoeus::Hydra do
     end
 
     first  = Typhoeus::Request.new("http://localhost:3000/foo", :params => {:delay => 1})
-    cached_response = double("foo", :code => 200)
+    cached_response = double("foo", :code => 200, :curl_return_code => 0)
     @cache.set(first.cache_key, cached_response, 60)
     hydra.queue first
     hydra.run
@@ -324,7 +324,7 @@ describe Typhoeus::Hydra do
     first  = Typhoeus::Request.new("http://localhost:3000/first", :params => {:delay => 1})
     second = Typhoeus::Request.new("http://localhost:3000/second", :params => {:delay => 1})
     third = Typhoeus::Request.new("http://localhost:3000/third", :params => {:delay => 1})
-    second_response = double("second", :code => 200)
+    second_response = double("second", :code => 200, :curl_return_code => 0)
     @cache.set(second.cache_key, second_response, 60)
     hydra.queue first
     hydra.queue second
@@ -500,6 +500,22 @@ describe Typhoeus::Hydra do
 
         it "returns false on normal timeout" do
           response.stub(:connect_timed_out?).and_return(false)
+          hydra.retry_request?(request, response).should be_false
+        end
+      end
+
+      context "when curl_retry_codes is [56]" do
+        before do
+          hydra.curl_retry_codes = [56]
+        end
+
+        it "should retry when curl_return_code is 56" do
+          response.stub(:curl_return_code).and_return(56)
+          hydra.retry_request?(request, response).should be_true
+        end
+
+        it "should not retry when curl_return_code is 57" do
+          response.stub(:curl_return_code).and_return(57)
           hydra.retry_request?(request, response).should be_false
         end
       end

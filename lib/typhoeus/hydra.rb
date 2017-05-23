@@ -8,7 +8,7 @@ module Typhoeus
     include Stubbing
     extend Callbacks
 
-    attr_accessor :retry_codes, :retry_connect_timeouts
+    attr_accessor :retry_codes, :retry_connect_timeouts, :curl_retry_codes
 
     def initialize(options = {})
       @memoize_requests = true
@@ -17,6 +17,7 @@ module Typhoeus
       initial_pool_size = options[:initial_pool_size] || 10
       @max_concurrency = options[:max_concurrency] || 200
       @retry_codes = options[:retry_codes] || []
+      @curl_retry_codes = options[:curl_retry_codes] || []
       @retry_connect_timeouts = options[:retry_connect_timeouts]
       initial_pool_size.times { @easy_pool << Easy.new }
       @memoized_requests = {}
@@ -227,13 +228,18 @@ module Typhoeus
 
     def disable_retry
       @retry_codes = []
+      @curl_retry_codes = []
       self
     end
 
     def retry_request?(request, response)
-      ((:get == request.method && retry_codes.include?(response.code)) || (retry_connect_timeouts? && response.connect_timed_out?)) &&
-      !request.requeued? &&
-      request.retry?
+      ((request.method == :get && retry_get?(response)) || (retry_connect_timeouts? && response.connect_timed_out?)) &&
+        !request.requeued? &&
+        request.retry?
+    end
+
+    def retry_get?(response)
+      retry_codes.include?(response.code) || curl_retry_codes.include?(response.curl_return_code)
     end
 
     def retry_connect_timeouts?

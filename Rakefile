@@ -16,3 +16,13 @@ task :start_test_servers do
 end
 
 task :default => :spec
+
+desc "compile C extension"
+task :compile do
+  system "cd ext/typhoeus; ruby extconf.rb; make"
+end
+
+desc "clean compilation artefacts"
+task :clean do
+  system "make -C ext/typhoeus clean"
+end

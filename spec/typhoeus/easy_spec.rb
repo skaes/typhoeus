@@ -88,8 +88,11 @@ describe Typhoeus::Easy do
       e.url = "http://localhost:3001/?delay=1"
       e.method = :get
       e.timeout = 10
+      start_time = Time.now
       e.perform
+      run_time = Time.now - start_time
       e.timed_out?.should == true
+      run_time.should < 0.2
     end
 
     it "should allow the setting of the max redirects to follow" do

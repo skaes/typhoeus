@@ -219,6 +219,16 @@ describe Typhoeus::Easy do
       easy.response_body.should include("this is a body!")
     end
 
+    it "should send a large request body" do
+      easy = Typhoeus::Easy.new
+      easy.url    = "http://localhost:3002"
+      easy.method = :put
+      easy.request_body = "1" * 2000
+      easy.perform
+      easy.response_code.should == 200
+      easy.response_body.should include("1" * 2000)
+    end
+
     it "should be able perform put with empty bodies on the same easy handle" do
       easy = Typhoeus::Easy.new
       easy.url    = "http://localhost:3002"
@@ -257,7 +267,17 @@ describe Typhoeus::Easy do
       easy.response_code.should == 200
       easy.response_body.should include("this is a body!")
     end
-    
+
+    it "should send a large request body" do
+      easy = Typhoeus::Easy.new
+      easy.url    = "http://localhost:3002"
+      easy.method = :post
+      easy.request_body = "1" * 2000
+      easy.perform
+      easy.response_code.should == 200
+      easy.response_body.should include("1" * 2000)
+    end
+
     it "should handle params" do
       easy = Typhoeus::Easy.new
       easy.url    = "http://localhost:3002"

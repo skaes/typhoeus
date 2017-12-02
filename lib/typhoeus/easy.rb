@@ -321,6 +321,8 @@ module Typhoeus
     end
 
     def set_headers
+      # supress 100-continue for server to avoid delays waiting for server response
+      headers["Expect"] = ""
       headers.each_pair do |key, value|
         easy_add_header("#{key}: #{value}")
       end

@@ -110,12 +110,20 @@ end
 
 put '/**' do
   puts request.inspect
-  request.env.merge!(:body => request.body.read).to_json
+  if request.env["HTTP_EXPECT"]
+    error 500
+  else
+    request.env.merge!(:body => request.body.read).to_json
+  end
 end
 
 post '/**' do
   puts request.inspect
-  request.env.merge!(:body => request.body.read).to_json
+  if request.env["HTTP_EXPECT"]
+    error 500
+  else
+    request.env.merge!(:body => request.body.read).to_json
+  end
 end
 
 delete '/**' do

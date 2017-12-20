@@ -29,4 +29,5 @@ Gem::Specification.new do |gem|
   gem.add_development_dependency "rspec", "~> 2.14.0"
   gem.add_development_dependency "sinatra"
   gem.add_development_dependency "json"
+  gem.add_development_dependency "activesupport"
 end

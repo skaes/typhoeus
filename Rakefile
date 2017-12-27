@@ -19,7 +19,7 @@ task :default => :spec
 
 desc "compile C extension"
 task :compile do
-  system "cd ext/typhoeus; ruby extconf.rb; make"
+  system "cd ext/typhoeus && ruby extconf.rb && make"
 end
 
 desc "clean compilation artefacts"

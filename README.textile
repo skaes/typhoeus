@@ -424,12 +424,12 @@ Running the specs requires the native extensions to be built and a couple of Sin
 
 <pre>
   # Make sure to build the native extensions
-  rake build_native
+  bundle exec rake compile
   # Start up the test servers (in another terminal)
-  rake start_test_servers
+  bundle exec start_test_servers
 
   # Run the specs
-  rake spec
+  bundle exec rake spec
 </pre>
 
 h2. Next Steps

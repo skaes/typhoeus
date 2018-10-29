@@ -1,5 +1,27 @@
 module Typhoeus
   class NormalizedHeaderHash < ::Hash
+    MAX_CACHED = 64
+
+    # inspired by https://github.com/discourse/mini_mime
+    class Cache
+      def initialize(size)
+        @size = size
+        @hash = {}
+      end
+
+      def []=(key, val)
+        @hash[key] = val
+        @hash.shift if @hash.length > @size
+        val
+      end
+
+      def fetch(key, &block)
+        @hash.fetch(key, &block)
+      end
+    end
+
+    @@convert_key_cache = Cache.new(MAX_CACHED)
+
     def initialize(constructor = {})
       if constructor.is_a?(Hash)
         super
@@ -52,7 +74,9 @@ module Typhoeus
 
   private
     def convert_key(key)
-      key.to_s.tr('_'.freeze,'-'.freeze).split('-'.freeze).map! { |segment| segment.capitalize }.join('-'.freeze)
+      @@convert_key_cache.fetch(key) do
+        @@convert_key_cache[key] = key.to_s.tr('_'.freeze,'-'.freeze).split('-'.freeze).map! { |segment| segment.capitalize }.join('-'.freeze)
+      end
     end
   end
 end

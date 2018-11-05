@@ -21,12 +21,12 @@ describe Typhoeus::Hydra do
   end
 
   it "has a singleton" do
-    Typhoeus::Hydra.hydra.should be_a Typhoeus::Hydra
+    expect(Typhoeus::Hydra.hydra).to be_a Typhoeus::Hydra
   end
 
   it "has a setter for the singleton" do
     Typhoeus::Hydra.hydra = :foo
-    Typhoeus::Hydra.hydra.should == :foo
+    expect(Typhoeus::Hydra.hydra).to eq(:foo)
     Typhoeus::Hydra.hydra = Typhoeus::Hydra.new
   end
 
@@ -42,10 +42,10 @@ describe Typhoeus::Hydra do
     hydra.queue first
     hydra.queue second
     hydra.run
-    first.response.body.should include("first")
-    first.performed?.should be_true
-    second.response.body.should include("second")
-    second.performed?.should be_true
+    expect(first.response.body).to include("first")
+    expect(first.performed?).to eq(true)
+    expect(second.response.body).to include("second")
+    expect(second.performed?).to eq(true)
   end
 
   it "runs queued requests in order of queuing" do
@@ -54,24 +54,24 @@ describe Typhoeus::Hydra do
     second = Typhoeus::Request.new("http://localhost:3001/second")
     third = Typhoeus::Request.new("http://localhost:3001/third")
     second.on_complete do |response|
-      first.response.should_not == nil
-      third.response.should == nil
+      expect(first.response).not_to eq(nil)
+      expect(third.response).to eq(nil)
     end
     third.on_complete do |response|
-      first.response.should_not == nil
-      second.response.should_not == nil
+      expect(first.response).not_to eq(nil)
+      expect(second.response).not_to eq(nil)
     end
 
     hydra.queue first
     hydra.queue second
     hydra.queue third
     hydra.run
-    first.response.body.should include("first")
-    second.response.body.should include("second")
-    third.response.body.should include("third")
-    first.performed?.should be_true
-    second.performed?.should be_true
-    third.performed?.should be_true
+    expect(first.response.body).to include("first")
+    expect(second.response.body).to include("second")
+    expect(third.response.body).to include("third")
+    expect(first.performed?).to eq(true)
+    expect(second.performed?).to eq(true)
+    expect(third.performed?).to eq(true)
   end
 
   it "aborts all other and queued requests if an exception raises in a callback" do
@@ -93,9 +93,9 @@ describe Typhoeus::Hydra do
     expect { hydra.run }.to raise_error(RuntimeError)
 
     # at this time the second request is already marked as performed
-    third.performed?.should be_false
-    invoked_callbacks.should == 1
-    hydra.instance_variable_get("@queued_requests").should == []
+    expect(third.performed?).to eq(false)
+    expect(invoked_callbacks).to eq(1)
+    expect(hydra.instance_variable_get("@queued_requests")).to eq([])
   end
 
   it "should store the curl return codes on the reponses" do
@@ -136,7 +136,7 @@ describe Typhoeus::Hydra do
     hydra.run
 
     # technically this should be '== 6' but I don't trust it...
-    completed.should < 10
+    expect(completed).to be < 10
   end
 
   it "abort! resets easy handles and caches" do
@@ -145,16 +145,16 @@ describe Typhoeus::Hydra do
       hydra.queue Typhoeus::Request.new("http://localhost:3000/foo")
     end
 
-    hydra.instance_variable_get("@queued_requests").size.should == 1
-    hydra.instance_variable_get("@memoized_requests").size.should == 1
-    hydra.instance_variable_get("@running_requests").should == 1
+    expect(hydra.instance_variable_get("@queued_requests").size).to eq(1)
+    expect(hydra.instance_variable_get("@memoized_requests").size).to eq(1)
+    expect(hydra.instance_variable_get("@running_requests")).to eq(1)
     hydra.instance_variable_get("@multi").easy_handles.size == 1
 
     hydra.abort!
 
-    hydra.instance_variable_get("@queued_requests").size.should == 0
-    hydra.instance_variable_get("@memoized_requests").size.should == 0
-    hydra.instance_variable_get("@running_requests").should == 0
+    expect(hydra.instance_variable_get("@queued_requests").size).to eq(0)
+    expect(hydra.instance_variable_get("@memoized_requests").size).to eq(0)
+    expect(hydra.instance_variable_get("@running_requests")).to eq(0)
     hydra.instance_variable_get("@multi").easy_handles.size == 0
   end
 
@@ -180,12 +180,12 @@ describe Typhoeus::Hydra do
     hydra.queue second
     start_time = Time.now
     hydra.run
-    first.response.body.should include("foo")
-    first.handled_response.body.should include("foo")
-    first.response.should == second.response
-    first.handled_response.should == second.handled_response
-    (Time.now - start_time).should < 1.2 # if it had run twice it would be ~ 2 seconds
-    first.performed?.should == !second.performed?
+    expect(first.response.body).to include("foo")
+    expect(first.handled_response.body).to include("foo")
+    expect(first.response).to eq(second.response)
+    expect(first.handled_response).to eq(second.handled_response)
+    expect(Time.now - start_time).to be < 1.2 # if it had run twice it would be ~ 2 seconds
+    expect(first.performed?).to eq(!second.performed?)
   end
 
   it "runs the handlers for all requests, queued before running the queue" do
@@ -198,8 +198,8 @@ describe Typhoeus::Hydra do
     hydra.queue first
     hydra.queue second
     hydra.run
-    call_count.should == 2
-    first.performed?.should == !second.performed?
+    expect(call_count).to eq(2)
+    expect(first.performed?).to eq(!second.performed?)
   end
 
   it "runs the handlers for all requests, even if queued in a callback" do
@@ -211,8 +211,8 @@ describe Typhoeus::Hydra do
     second.on_complete { |response| call_count += 1 }
     hydra.queue first
     hydra.run
-    call_count.should == 2
-    first.performed?.should == !second.performed?
+    expect(call_count).to eq(2)
+    expect(first.performed?).to eq(!second.performed?)
   end
 
   it "runs the handlers for all requests, even if queued in a callback in strange order" do
@@ -231,10 +231,10 @@ describe Typhoeus::Hydra do
     hydra.queue first
     hydra.queue second
     hydra.run
-    call_count.should == 4
-    first.performed?.should be_true
-    second.performed?.should be_true
-    third.performed?.should == !fourth.performed?
+    expect(call_count).to eq(4)
+    expect(first.performed?).to eq(true)
+    expect(second.performed?).to eq(true)
+    expect(third.performed?).to eq(!fourth.performed?)
   end
 
   it "continues queued requests after a memoization hit" do
@@ -250,11 +250,11 @@ describe Typhoeus::Hydra do
     hydra.queue third
     hydra.run
 
-    first.response.body.should include("foo")
-    second.response.body.should include("foo")
-    third.response.body.should include("bar")
-    first.performed?.should == !second.performed?
-    third.performed?.should be_true
+    expect(first.response.body).to include("foo")
+    expect(second.response.body).to include("foo")
+    expect(third.response.body).to include("bar")
+    expect(first.performed?).to eq(!second.performed?)
+    expect(third.performed?).to eq(true)
   end
 
   it "can turn off memoization for GET requests" do
@@ -265,10 +265,10 @@ describe Typhoeus::Hydra do
     hydra.queue first
     hydra.queue second
     hydra.run
-    first.response.body.should include("foo")
-    first.response.object_id.should_not == second.response.object_id
-    first.performed?.should be_true
-    second.performed?.should be_true
+    expect(first.response.body).to include("foo")
+    expect(first.response.object_id).not_to eq(second.response.object_id)
+    expect(first.performed?).to eq(true)
+    expect(second.performed?).to eq(true)
   end
 
   it "pulls GETs from cache" do
@@ -286,9 +286,9 @@ describe Typhoeus::Hydra do
     @cache.set(first.cache_key, cached_response, 60)
     hydra.queue first
     hydra.run
-    (Time.now - start_time).should < 0.1
-    first.response.should == cached_response
-    first.performed?.should be_false
+    expect(Time.now - start_time).to be < 0.1
+    expect(first.response).to eq(cached_response)
+    expect(first.performed?).to eq(false)
   end
 
   it "sets GET responses to cache when the request has a cache_timeout value" do
@@ -305,9 +305,9 @@ describe Typhoeus::Hydra do
     hydra.queue first
     hydra.queue second
     hydra.run
-    first.response.body.should include("first")
-    @cache.get(first.cache_key).should == first.response
-    @cache.get(second.cache_key).should be_nil
+    expect(first.response.body).to include("first")
+    expect(@cache.get(first.cache_key)).to eq(first.response)
+    expect(@cache.get(second.cache_key)).to be_nil
   end
 
   it "continues queued requests after a queued cache hit" do
@@ -331,9 +331,9 @@ describe Typhoeus::Hydra do
     hydra.queue third
     hydra.run
 
-    first.response.body.should include("first")
-    second.response.should == second_response
-    third.response.body.should include("third")
+    expect(first.response.body).to include("first")
+    expect(second.response).to eq(second_response)
+    expect(third.response.body).to include("third")
   end
 
   it "has a global on_complete" do
@@ -346,8 +346,8 @@ describe Typhoeus::Hydra do
     first  = Typhoeus::Request.new("http://localhost:3000/first")
     hydra.queue first
     hydra.run
-    first.response.body.should include("first")
-    foo.should == :called
+    expect(first.response.body).to include("first")
+    expect(foo).to eq(:called)
   end
 
   it "has a global on_complete setter" do
@@ -359,8 +359,8 @@ describe Typhoeus::Hydra do
     first  = Typhoeus::Request.new("http://localhost:3000/first")
     hydra.queue first
     hydra.run
-    first.response.body.should include("first")
-    foo.should == :called
+    expect(first.response.body).to include("first")
+    expect(foo).to eq(:called)
   end
 
   it "should reuse connections from the pool for a host"
@@ -374,14 +374,14 @@ describe Typhoeus::Hydra do
     request = Typhoeus::Request.new("http://localhost:3000/first", :params => {:delay => 1})
     request.on_complete do |response|
       @responses << response
-      response.body.should include("first")
+      expect(response.body).to include("first")
     end
 
     request.after_complete do |object|
       second_request = Typhoeus::Request.new("http://localhost:3001/second", :params => {:delay => 2})
       second_request.on_complete do |response|
         @responses << response
-        response.body.should include("second")
+        expect(response.body).to include("second")
       end
       hydra.queue second_request
     end
@@ -390,13 +390,13 @@ describe Typhoeus::Hydra do
     third_request = Typhoeus::Request.new("http://localhost:3002/third", :params => {:delay => 3})
     third_request.on_complete do |response|
       @responses << response
-      response.body.should include("third")
+      expect(response.body).to include("third")
     end
     hydra.queue third_request
 
     hydra.run
-    @responses.size.should == 3
-    (Time.now - start_time).should < 3.3
+    expect(@responses.size).to eq(3)
+    expect(Time.now - start_time).to be < 3.3
   end
 
   it "should fire and forget" do
@@ -427,10 +427,10 @@ describe Typhoeus::Hydra do
     hydra.run
     finish_time = Time.now
 
-    first.response.code.should == 200
-    second.response.code.should == 200
-    third.response.code.should == 200
-    (finish_time - start_time).should > 2.0
+    expect(first.response.code).to eq(200)
+    expect(second.response.code).to eq(200)
+    expect(third.response.code).to eq(200)
+    expect(finish_time - start_time).to be > 2.0
   end
 
   it "should respect the follow_location option when set on a request" do
@@ -439,7 +439,7 @@ describe Typhoeus::Hydra do
     hydra.queue request
     hydra.run
 
-    request.response.code.should == 200
+    expect(request.response.code).to eq(200)
   end
 
   it "should pass through the max_redirects option when set on a request" do
@@ -448,7 +448,7 @@ describe Typhoeus::Hydra do
     hydra.queue request
     hydra.run
 
-    request.response.code.should == 302
+    expect(request.response.code).to eq(302)
   end
 
   describe "retry_request?" do
@@ -461,8 +461,8 @@ describe Typhoeus::Hydra do
 
       context "when retry_connect_timeouts is disabled" do
         it "returns false on connect timeout" do
-          response.stub(:connect_timed_out?).and_return(true)
-          hydra.retry_request?(request, response).should be_false
+          allow(response).to receive(:connect_timed_out?).and_return(true)
+          expect(hydra.retry_request?(request, response)).to eq(false)
         end
       end
 
@@ -472,8 +472,8 @@ describe Typhoeus::Hydra do
         end
 
         it "returns true on connect timeout" do
-          response.stub(:connect_timed_out?).and_return(true)
-          hydra.retry_request?(request, response).should be_true
+          allow(response).to receive(:connect_timed_out?).and_return(true)
+          expect(hydra.retry_request?(request, response)).to eq(true)
         end
       end
     end
@@ -483,8 +483,8 @@ describe Typhoeus::Hydra do
 
       context "when retry_connect_timeouts is disabled" do
         it "returns false on connect timeout" do
-          response.stub(:connect_timed_out?).and_return(true)
-          hydra.retry_request?(request, response).should be_false
+          allow(response).to receive(:connect_timed_out?).and_return(true)
+          expect(hydra.retry_request?(request, response)).to eq(false)
         end
       end
 
@@ -494,13 +494,13 @@ describe Typhoeus::Hydra do
         end
 
         it "returns true on connect timeout" do
-          response.stub(:connect_timed_out?).and_return(true)
-          hydra.retry_request?(request, response).should be_true
+          allow(response).to receive(:connect_timed_out?).and_return(true)
+          expect(hydra.retry_request?(request, response)).to eq(true)
         end
 
         it "returns false on normal timeout" do
-          response.stub(:connect_timed_out?).and_return(false)
-          hydra.retry_request?(request, response).should be_false
+          allow(response).to receive(:connect_timed_out?).and_return(false)
+          expect(hydra.retry_request?(request, response)).to eq(false)
         end
       end
 
@@ -510,13 +510,13 @@ describe Typhoeus::Hydra do
         end
 
         it "should retry when curl_return_code is 56" do
-          response.stub(:curl_return_code).and_return(56)
-          hydra.retry_request?(request, response).should be_true
+          allow(response).to receive(:curl_return_code).and_return(56)
+          expect(hydra.retry_request?(request, response)).to eq(true)
         end
 
         it "should not retry when curl_return_code is 57" do
-          response.stub(:curl_return_code).and_return(57)
-          hydra.retry_request?(request, response).should be_false
+          allow(response).to receive(:curl_return_code).and_return(57)
+          expect(hydra.retry_request?(request, response)).to eq(false)
         end
       end
     end
@@ -531,8 +531,8 @@ describe Typhoeus::Hydra::Stubbing do
                                         :user_agent => 'test')
       @request.on_complete do |response|
         @on_complete_handler_called = true
-        response.code.should == 404
-        response.headers.should == "whatever"
+        expect(response.code).to eq(404)
+        expect(response.headers).to eq("whatever")
       end
       @response = Typhoeus::Response.new(:code => 404,
                                          :headers => "whatever",
@@ -546,7 +546,7 @@ describe Typhoeus::Hydra::Stubbing do
 
     it "should provide a stubs accessor" do
       begin
-        @stub_target.stubs.should == []
+        expect(@stub_target.stubs).to eq([])
         @stub_target.stubs = [:foo]
       ensure
         @stub_target.clear_stubs
@@ -560,8 +560,8 @@ describe Typhoeus::Hydra::Stubbing do
 
       @hydra.queue(@request)
       @hydra.run
-      @on_complete_handler_called.should be_true
-      @response.request.should == @request
+      expect(@on_complete_handler_called).to eq(true)
+      expect(@response.request).to eq(@request)
     end
 
     it "stubs requests to URIs matching a pattern" do
@@ -570,8 +570,8 @@ describe Typhoeus::Hydra::Stubbing do
                         and_return(@response)
       @hydra.queue(@request)
       @hydra.run
-      @on_complete_handler_called.should be_true
-      @response.request.should == @request
+      expect(@on_complete_handler_called).to eq(true)
+      expect(@response.request).to eq(@request)
     end
 
     it "can clear stubs" do
@@ -596,11 +596,11 @@ describe Typhoeus::Hydra::Stubbing do
         @hydra.queue(request)
       end
 
-      expect{ @hydra.run }.to raise_exception
+      expect{ @hydra.run }.to raise_error(RuntimeError)
 
       @hydra.clear_stubs
 
-      expect{ @hydra.run }.to_not raise_exception
+      expect{ @hydra.run }.to_not raise_error
     end
 
     it "clears out previously queued requests once they are called" do
@@ -615,9 +615,9 @@ describe Typhoeus::Hydra::Stubbing do
       end
       @hydra.queue(request)
       @hydra.run
-      call_count.should == 1
+      expect(call_count).to eq(1)
       @hydra.run
-      call_count.should == 1
+      expect(call_count).to eq(1)
     end
 
     it "calls stubs for requests that are queued up in the on_complete of a first stub" do
@@ -636,7 +636,7 @@ describe Typhoeus::Hydra::Stubbing do
       @hydra.queue(request)
       @hydra.run
 
-      second_handler_called.should be_true
+      expect(second_handler_called).to eq(true)
     end
   end
 
@@ -685,7 +685,7 @@ describe Typhoeus::Hydra::Callbacks do
         hydra.queue(request)
         hydra.run
 
-        http_method.should == :get
+        expect(http_method).to eq(:get)
       ensure
         @klass.clear_global_hooks
       end
@@ -768,11 +768,11 @@ describe Typhoeus::Hydra::ConnectOptions do
   describe "#allow_net_connect" do
     it "should be settable" do
       @klass.allow_net_connect = true
-      @klass.allow_net_connect.should be_true
+      expect(@klass.allow_net_connect).to eq(true)
     end
 
     it "should default to true" do
-      @klass.allow_net_connect.should be_true
+      expect(@klass.allow_net_connect).to eq(true)
     end
 
     it "should raise an error if we queue a request while its false" do
@@ -787,7 +787,7 @@ describe Typhoeus::Hydra::ConnectOptions do
 
   describe "#allow_net_connect?" do
     it "should return true by default" do
-      @klass.allow_net_connect?.should be_true
+      expect(@klass.allow_net_connect?).to eq(true)
     end
   end
 end

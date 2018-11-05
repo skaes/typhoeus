@@ -11,23 +11,23 @@ describe Typhoeus::Request do
     end
 
     it "should dump out the URI" do
-      @request.inspect.should =~ /http:\/\/www\.google\.com/
+      expect(@request.inspect).to match(/http:\/\/www\.google\.com/)
     end
 
     it "should dump out the body" do
-      @request.inspect.should =~ /a=1&b=2/
+      expect(@request.inspect).to match(/a=1&b=2/)
     end
 
     it "should dump params" do
-      @request.inspect.should =~ /:c\s*=>\s*"ok"/
+      expect(@request.inspect).to match(/:c\s*=>\s*"ok"/)
     end
 
     it "should dump the method" do
-      @request.inspect.should =~ /:get/
+      expect(@request.inspect).to match(/:get/)
     end
 
     it "should dump out headers" do
-      @request.inspect.should =~ /"Content-Type"\s*=>\s*"text\/html"/
+      expect(@request.inspect).to match(/"Content-Type"\s*=>\s*"text\/html"/)
     end
   end
 
@@ -35,13 +35,13 @@ describe Typhoeus::Request do
     %w(localhost 127.0.0.1 0.0.0.0).each do |host|
       it "should be true for the #{host} host" do
         req = Typhoeus::Request.new("http://#{host}")
-        req.should be_localhost
+        expect(req).to be_localhost
       end
     end
 
     it "should be false for other domains" do
       req = Typhoeus::Request.new("http://google.com")
-      req.should_not be_localhost
+      expect(req).not_to be_localhost
     end
   end
 
@@ -56,7 +56,7 @@ describe Typhoeus::Request do
         }
       )
 
-      request.params_string.should == "a=jlk&b=fdsa&c=789"
+      expect(request.params_string).to eq("a=jlk&b=fdsa&c=789")
     end
 
     it "should accept symboled keys" do
@@ -66,7 +66,7 @@ describe Typhoeus::Request do
                                         :a => 'jlk',
                                         :c => '789'
                                       })
-      request.params_string.should == "a=jlk&b=fdsa&c=789"
+      expect(request.params_string).to eq("a=jlk&b=fdsa&c=789")
     end
 
     it "should translate params with values that are arrays to the proper format" do
@@ -74,15 +74,15 @@ describe Typhoeus::Request do
                                       :params => {
                                         :a => ['789','2434']
                                       })
-      request.params_string.should == "a=789&a=2434"
+      expect(request.params_string).to eq("a=789&a=2434")
     end
-    
+
     it "should allow the newer bracket notation for array params" do
       request = Typhoeus::Request.new('http://google.com',
                                       :params => {
                                         "a[]" => ['789','2434']
                                       })
-      request.params_string.should == "a%5B%5D=789&a%5B%5D=2434"
+      expect(request.params_string).to eq("a%5B%5D=789&a%5B%5D=2434")
     end
 
     it "should nest arrays in hashes" do
@@ -90,7 +90,7 @@ describe Typhoeus::Request do
                                       :params => {
                                         :a => { :b => { :c => ['d','e'] } }
                                       })
-      request.params_string.should == "a%5Bb%5D%5Bc%5D=d&a%5Bb%5D%5Bc%5D=e"
+      expect(request.params_string).to eq("a%5Bb%5D%5Bc%5D=d&a%5Bb%5D%5Bc%5D=e")
     end
 
     it "should translate nested params correctly" do
@@ -98,86 +98,86 @@ describe Typhoeus::Request do
                                       :params => {
                                         :a => { :b => { :c => 'd' } }
                                       })
-      request.params_string.should == "a%5Bb%5D%5Bc%5D=d"
+      expect(request.params_string).to eq("a%5Bb%5D%5Bc%5D=d")
     end
   end
 
   describe "quick request methods" do
     it "can run a GET synchronously" do
       response = Typhoeus::Request.get("http://localhost:3000", :params => {:q => "hi"}, :headers => {:foo => "bar"})
-      response.code.should == 200
-      JSON.parse(response.body)["REQUEST_METHOD"].should == "GET"
+      expect(response.code).to eq(200)
+      expect(JSON.parse(response.body)["REQUEST_METHOD"]).to eq("GET")
     end
 
     it "can run a POST synchronously" do
       response = Typhoeus::Request.post("http://localhost:3000", :params => {:q => { :a => "hi" } }, :headers => {:foo => "bar"})
-      response.code.should == 200
+      expect(response.code).to eq(200)
       json = JSON.parse(response.body)
-      json["REQUEST_METHOD"].should == "POST"
-      json["rack.request.form_hash"]["q"]["a"].should == "hi"
+      expect(json["REQUEST_METHOD"]).to eq("POST")
+      expect(json["rack.request.form_hash"]["q"]["a"]).to eq("hi")
     end
 
     it "can run a PUT synchronously" do
       response = Typhoeus::Request.put("http://localhost:3000", :params => {:q => "hi"}, :headers => {:foo => "bar"})
-      response.code.should == 200
-      JSON.parse(response.body)["REQUEST_METHOD"].should == "PUT"
+      expect(response.code).to eq(200)
+      expect(JSON.parse(response.body)["REQUEST_METHOD"]).to eq("PUT")
     end
 
     it "can run a DELETE synchronously" do
       response = Typhoeus::Request.delete("http://localhost:3000", :params => {:q => "hi"}, :headers => {:foo => "bar"})
-      response.code.should == 200
-      JSON.parse(response.body)["REQUEST_METHOD"].should == "DELETE"
+      expect(response.code).to eq(200)
+      expect(JSON.parse(response.body)["REQUEST_METHOD"]).to eq("DELETE")
     end
   end
 
   it "takes url as the first argument" do
-    Typhoeus::Request.new("http://localhost:3000").url.should == "http://localhost:3000"
+    expect(Typhoeus::Request.new("http://localhost:3000").url).to eq("http://localhost:3000")
   end
 
   it "should parse the host from the url" do
-    Typhoeus::Request.new("http://localhost:3000/whatever?hi=foo").host.should == "http://localhost:3000"
-    Typhoeus::Request.new("http://localhost:3000?hi=foo").host.should == "http://localhost:3000"
-    Typhoeus::Request.new("http://localhost:3000").host.should == "http://localhost:3000"
+    expect(Typhoeus::Request.new("http://localhost:3000/whatever?hi=foo").host).to eq("http://localhost:3000")
+    expect(Typhoeus::Request.new("http://localhost:3000?hi=foo").host).to eq("http://localhost:3000")
+    expect(Typhoeus::Request.new("http://localhost:3000").host).to eq("http://localhost:3000")
   end
 
   it "takes method as an option" do
-    Typhoeus::Request.new("http://localhost:3000", :method => :get).method.should == :get
+    expect(Typhoeus::Request.new("http://localhost:3000", :method => :get).method).to eq(:get)
   end
 
   it "takes headers as an option" do
     headers = {:foo => :bar}
     request = Typhoeus::Request.new("http://localhost:3000", :headers => headers)
-    request.headers.should == headers
+    expect(request.headers).to eq(headers)
   end
 
   it "takes params as an option and adds them to the url" do
-    Typhoeus::Request.new("http://localhost:3000", :params => {:foo => "bar"}).url.should == "http://localhost:3000?foo=bar"
+    expect(Typhoeus::Request.new("http://localhost:3000", :params => {:foo => "bar"}).url).to eq("http://localhost:3000?foo=bar")
   end
 
   it "takes request body as an option" do
-    Typhoeus::Request.new("http://localhost:3000", :body => "whatever").body.should == "whatever"
+    expect(Typhoeus::Request.new("http://localhost:3000", :body => "whatever").body).to eq("whatever")
   end
 
   it "takes timeout as an option" do
-    Typhoeus::Request.new("http://localhost:3000", :timeout => 10).timeout.should == 10
+    expect(Typhoeus::Request.new("http://localhost:3000", :timeout => 10).timeout).to eq(10)
   end
 
   it "takes cache_timeout as an option" do
-    Typhoeus::Request.new("http://localhost:3000", :cache_timeout => 60).cache_timeout.should == 60
+    expect(Typhoeus::Request.new("http://localhost:3000", :cache_timeout => 60).cache_timeout).to eq(60)
   end
 
   it "takes follow_location as an option" do
-    Typhoeus::Request.new("http://localhost:3000", :follow_location => true).follow_location.should == true
+    expect(Typhoeus::Request.new("http://localhost:3000", :follow_location => true).follow_location).to eq(true)
   end
 
   it "takes max_redirects as an option" do
-    Typhoeus::Request.new("http://localhost:3000", :max_redirects => 10).max_redirects.should == 10
+    expect(Typhoeus::Request.new("http://localhost:3000", :max_redirects => 10).max_redirects).to eq(10)
   end
 
   it "has the associated response object" do
     request = Typhoeus::Request.new("http://localhost:3000")
     request.response = :foo
-    request.response.should == :foo
+    expect(request.response).to eq(:foo)
   end
 
   it "has an on_complete handler that is called when the request is completed" do
@@ -188,7 +188,7 @@ describe Typhoeus::Request do
     end
     request.response = :bar
     request.call_handlers
-    foo.should == :bar
+    expect(foo).to eq(:bar)
   end
 
   it "has an on_complete setter" do
@@ -198,7 +198,7 @@ describe Typhoeus::Request do
     request.on_complete = proc
     request.response = :bar
     request.call_handlers
-    foo.should == :bar
+    expect(foo).to eq(:bar)
   end
 
   it "stores the handled response that is the return value from the on_complete block" do
@@ -208,7 +208,7 @@ describe Typhoeus::Request do
     end
     request.response = :bar
     request.call_handlers
-    request.handled_response.should == "handled"
+    expect(request.handled_response).to eq("handled")
   end
 
   it "has an after_complete handler that recieves what on_complete returns" do
@@ -221,7 +221,7 @@ describe Typhoeus::Request do
       good = object == "handled"
     end
     request.call_handlers
-    good.should be_true
+    expect(good).to eq(true)
   end
 
   it "has an after_complete setter" do
@@ -234,33 +234,33 @@ describe Typhoeus::Request do
     request.after_complete = proc
 
     request.call_handlers
-    good.should be_true
+    expect(good).to eq(true)
   end
 
   describe "time info" do
     it "should have time" do
       response = Typhoeus::Request.get("http://localhost:3000")
-      response.time.should > 0
+      expect(response.time).to be > 0
     end
 
     it "should have connect time" do
       response = Typhoeus::Request.get("http://localhost:3000")
-      response.connect_time.should > 0
+      expect(response.connect_time).to be > 0
     end
 
     it "should have app connect time" do
       response = Typhoeus::Request.get("http://localhost:3000")
-      response.app_connect_time.should  > 0
+      expect(response.app_connect_time).to  be > 0
     end
 
     it "should have start transfer time" do
       response = Typhoeus::Request.get("http://localhost:3000")
-      response.start_transfer_time.should  > 0
+      expect(response.start_transfer_time).to  be > 0
     end
 
     it "should have pre-transfer time" do
       response = Typhoeus::Request.get("http://localhost:3000")
-      response.pretransfer_time.should  > 0
+      expect(response.pretransfer_time).to  be > 0
     end
 
   end
@@ -268,7 +268,7 @@ describe Typhoeus::Request do
   describe "performed" do
     it "should initially respond with false" do
       request = Typhoeus::Request.new("http://localhost:3000")
-      request.performed?.should be_false
+      expect(request.performed?).to eq(false)
     end
   end
 
@@ -280,7 +280,7 @@ describe Typhoeus::Request do
         "http://localhost:3001/auth_basic/#{auth[:username]}/#{auth[:password]}",
         auth
       )
-      e.code.should == 200
+      expect(e.code).to eq(200)
     end
 
     it "should allow to set authentication method" do
@@ -293,7 +293,7 @@ describe Typhoeus::Request do
         "http://localhost:3001/auth_ntlm",
         auth
       )
-      e.code.should == 200
+      expect(e.code).to eq(200)
     end
 
   end

@@ -8,9 +8,9 @@ describe Typhoeus::Easy do
     easy.method = :get
 
     multi.add(easy)
-    multi.easy_handles.should == [easy]
+    expect(multi.easy_handles).to eq([easy])
     multi.perform
-    multi.easy_handles.should == []
+    expect(multi.easy_handles).to eq([])
   end
   
   it "should be reusable" do
@@ -21,8 +21,8 @@ describe Typhoeus::Easy do
     multi = Typhoeus::Multi.new
     multi.add(easy)
     multi.perform
-    easy.response_code.should == 200
-    JSON.parse(easy.response_body)["REQUEST_METHOD"].should == "GET"
+    expect(easy.response_code).to eq(200)
+    expect(JSON.parse(easy.response_body)["REQUEST_METHOD"]).to eq("GET")
     
     e2 = Typhoeus::Easy.new
     e2.url = "http://localhost:3002"
@@ -30,8 +30,8 @@ describe Typhoeus::Easy do
     multi.add(e2)
     multi.perform
     
-    e2.response_code.should == 200
-    JSON.parse(e2.response_body)["REQUEST_METHOD"].should == "POST"
+    expect(e2.response_code).to eq(200)
+    expect(JSON.parse(e2.response_body)["REQUEST_METHOD"]).to eq("POST")
   end
   
   it "should perform easy handles added after the first one runs" do
@@ -49,10 +49,10 @@ describe Typhoeus::Easy do
     end
     
     multi.perform
-    easy.response_code.should == 200
-    JSON.parse(easy.response_body)["REQUEST_METHOD"].should == "GET"
-    e2.response_code.should == 200
-    JSON.parse(e2.response_body)["REQUEST_METHOD"].should == "POST"
+    expect(easy.response_code).to eq(200)
+    expect(JSON.parse(easy.response_body)["REQUEST_METHOD"]).to eq("GET")
+    expect(e2.response_code).to eq(200)
+    expect(JSON.parse(e2.response_body)["REQUEST_METHOD"]).to eq("POST")
   end
   
   # it "should do multiple gets" do

@@ -3,13 +3,13 @@ require File.expand_path(File.dirname(__FILE__) + "/../spec_helper")
 describe Typhoeus::HydraMock do
   it "should mark all responses as mocks" do
     response = Typhoeus::Response.new(:mock => false)
-    response.should_not be_mock
+    expect(response).not_to be_mock
 
     mock = Typhoeus::HydraMock.new("http://localhost", :get)
     mock.and_return(response)
 
-    mock.response.should be_mock
-    response.should be_mock
+    expect(mock.response).to be_mock
+    expect(response).to be_mock
   end
 
   describe "stubbing response values" do
@@ -23,7 +23,7 @@ describe Typhoeus::HydraMock do
         @stub.and_return(response)
 
         5.times do
-          @stub.response.should == response
+          expect(@stub.response).to eq(response)
         end
       end
     end
@@ -39,11 +39,11 @@ describe Typhoeus::HydraMock do
         @stub.and_return(responses)
 
         0.upto(2) do |i|
-          @stub.response.should == responses[i]
+          expect(@stub.response).to eq(responses[i])
         end
 
         5.times do
-          @stub.response.should == responses.last
+          expect(@stub.response).to eq(responses.last)
         end
       end
     end
@@ -55,7 +55,7 @@ describe Typhoeus::HydraMock do
         request = Typhoeus::Request.new("http://localhost:3000",
                                         :method => :get)
         mock = Typhoeus::HydraMock.new("http://localhost:3000", :post)
-        mock.matches?(request).should be_false
+        expect(mock.matches?(request)).to eq(false)
       end
     end
 
@@ -66,7 +66,7 @@ describe Typhoeus::HydraMock do
         request = Typhoeus::Request.new('http://www.example.com/',
                                         :method => :get,
                                         :user_agent => 'test')
-        mock.matches?(request).should be_true
+        expect(mock.matches?(request)).to eq(true)
       end
 
       it "should handle default port 443 sanely" do
@@ -75,7 +75,7 @@ describe Typhoeus::HydraMock do
         request = Typhoeus::Request.new('https://www.example.com/',
                                         :method => :get,
                                         :user_agent => 'test')
-        mock.matches?(request).should be_true
+        expect(mock.matches?(request)).to eq(true)
       end
     end
 
@@ -88,7 +88,7 @@ describe Typhoeus::HydraMock do
           request = Typhoeus::Request.new("http://localhost:3000",
                                           :method => verb,
                                           :user_agent => 'test')
-          mock.matches?(request).should be_true
+          expect(mock.matches?(request)).to eq(true)
         end
       end
     end
@@ -106,9 +106,9 @@ describe Typhoeus::HydraMock do
         subject { hydra_mock }
 
         it "matches regardless of whether or not the request has headers" do
-          subject.matches?(request(:headers => nil)).should be_true
-          subject.matches?(request(:headers => {})).should be_true
-          subject.matches?(request(:headers => { 'a' => 'b' })).should be_true
+          expect(subject.matches?(request(:headers => nil))).to eq(true)
+          expect(subject.matches?(request(:headers => {}))).to eq(true)
+          expect(subject.matches?(request(:headers => { 'a' => 'b' }))).to eq(true)
         end
       end
 
@@ -117,12 +117,12 @@ describe Typhoeus::HydraMock do
           subject { hydra_mock(:headers => value) }
 
           it "matches when the request has no headers" do
-            subject.matches?(request(:headers => nil)).should be_true
-            subject.matches?(request(:headers => {})).should be_true
+            expect(subject.matches?(request(:headers => nil))).to eq(true)
+            expect(subject.matches?(request(:headers => {}))).to eq(true)
           end
 
           it "does not match when the request has headers" do
-            subject.matches?(request(:headers => { 'a' => 'b' })).should be_false
+            expect(subject.matches?(request(:headers => { 'a' => 'b' }))).to eq(false)
           end
         end
       end
@@ -131,114 +131,114 @@ describe Typhoeus::HydraMock do
         it 'does not match if the request has no headers' do
           m = hydra_mock(:headers => { 'A' => 'B', 'C' => 'D' })
 
-          m.matches?(request).should be_false
-          m.matches?(request(:headers => nil)).should be_false
-          m.matches?(request(:headers => {})).should be_false
+          expect(m.matches?(request)).to eq(false)
+          expect(m.matches?(request(:headers => nil))).to eq(false)
+          expect(m.matches?(request(:headers => {}))).to eq(false)
         end
 
         it 'does not match if the request lacks any of the given headers' do
-          hydra_mock(
+          expect(hydra_mock(
             :headers => { 'A' => 'B', 'C' => 'D' }
           ).matches?(request(
             :headers => { 'A' => 'B' }
-          )).should be_false
+          ))).to eq(false)
         end
 
         it 'does not match if any of the specified values are different from the request value' do
-          hydra_mock(
+          expect(hydra_mock(
             :headers => { 'A' => 'B', 'C' => 'D' }
           ).matches?(request(
             :headers => { 'A' => 'B', 'C' => 'E' }
-          )).should be_false
+          ))).to eq(false)
         end
 
         it 'matches if the given hash is exactly equal to the request headers' do
-          hydra_mock(
+          expect(hydra_mock(
             :headers => { 'A' => 'B', 'C' => 'D' }
           ).matches?(request(
             :headers => { 'A' => 'B', 'C' => 'D' }
-          )).should be_true
+          ))).to eq(true)
         end
 
         it 'matches even if the request has additional headers not specified in the mock' do
-          hydra_mock(
+          expect(hydra_mock(
             :headers => { 'A' => 'B', 'C' => 'D' }
           ).matches?(request(
             :headers => { 'A' => 'B', 'C' => 'D', 'E' => 'F' }
-          )).should be_true
+          ))).to eq(true)
         end
 
         it 'matches even if the casing of the header keys is different between the mock and request' do
-          hydra_mock(
+          expect(hydra_mock(
             :headers => { 'A' => 'B', 'c' => 'D' }
           ).matches?(request(
             :headers => { 'a' => 'B', 'C' => 'D' }
-          )).should be_true
+          ))).to eq(true)
         end
 
         it 'matches if the mocked values are regexes and match the request values' do
-          hydra_mock(
+          expect(hydra_mock(
             :headers => { 'A' => /foo/, }
           ).matches?(request(
             :headers => { 'A' => 'foo bar' }
-          )).should be_true
+          ))).to eq(true)
         end
 
         it 'does not match if the mocked values are regexes and do not match the request values' do
-          hydra_mock(
+          expect(hydra_mock(
             :headers => { 'A' => /foo/, }
           ).matches?(request(
             :headers => { 'A' => 'bar' }
-          )).should be_false
+          ))).to eq(false)
         end
 
         context 'when a header is specified as an array' do
           it 'matches when the request header has the same array' do
-            hydra_mock(
+            expect(hydra_mock(
               :headers => { 'Accept' => ['text/html', 'text/plain'] }
             ).matches?(request(
               :headers => { 'Accept' => ['text/html', 'text/plain'] }
-            )).should be_true
+            ))).to eq(true)
           end
 
           it 'matches when the request header is a single value and the mock array has the same value' do
-            hydra_mock(
+            expect(hydra_mock(
               :headers => { 'Accept' => ['text/html'] }
             ).matches?(request(
               :headers => { 'Accept' => 'text/html' }
-            )).should be_true
+            ))).to eq(true)
           end
 
           it 'matches even when the request header array is ordered differently' do
-            hydra_mock(
+            expect(hydra_mock(
               :headers => { 'Accept' => ['text/html', 'text/plain'] }
             ).matches?(request(
               :headers => { 'Accept' => ['text/plain', 'text/html'] }
-            )).should be_true
+            ))).to eq(true)
           end
 
           it 'does not match when the request header array lacks a value' do
-            hydra_mock(
+            expect(hydra_mock(
               :headers => { 'Accept' => ['text/html', 'text/plain'] }
             ).matches?(request(
               :headers => { 'Accept' => ['text/plain'] }
-            )).should be_false
+            ))).to eq(false)
           end
 
           it 'does not match when the request header array has an extra value' do
-            hydra_mock(
+            expect(hydra_mock(
               :headers => { 'Accept' => ['text/html', 'text/plain'] }
             ).matches?(request(
               :headers => { 'Accept' => ['text/html', 'text/plain', 'application/xml'] }
-            )).should be_false
+            ))).to eq(false)
           end
 
           it 'does not match when the request header is not an array' do
-            hydra_mock(
+            expect(hydra_mock(
               :headers => { 'Accept' => ['text/html', 'text/plain'] }
             ).matches?(request(
               :headers => { 'Accept' => 'text/html' }
-            )).should be_false
+            ))).to eq(false)
           end
         end
       end
@@ -252,7 +252,7 @@ describe Typhoeus::HydraMock do
                                         :body => "fdsafdsa")
         mock = Typhoeus::HydraMock.new("http://localhost:3000", :get,
                                        :headers => { 'user-agent' => 'test' })
-        mock.matches?(request).should be_true
+        expect(mock.matches?(request)).to eq(true)
       end
 
       it "should match nil correctly" do
@@ -261,7 +261,7 @@ describe Typhoeus::HydraMock do
                                         :body => "fdsafdsa")
         mock = Typhoeus::HydraMock.new("http://localhost:3000", :get,
                                        :body => nil)
-        mock.matches?(request).should be_false
+        expect(mock.matches?(request)).to eq(false)
       end
 
       it "should not match if the bodies do not match" do
@@ -270,7 +270,7 @@ describe Typhoeus::HydraMock do
                                         :body => "ffdsadsafdsa")
         mock = Typhoeus::HydraMock.new("http://localhost:3000", :get,
                                        :body => 'fdsafdsa')
-        mock.matches?(request).should be_false
+        expect(mock.matches?(request)).to eq(false)
       end
 
       it "should match on optional body parameter" do
@@ -283,7 +283,7 @@ describe Typhoeus::HydraMock do
                                        :headers => {
                                          'User-Agent' => 'test'
                                        })
-        mock.matches?(request).should be_true
+        expect(mock.matches?(request)).to eq(true)
       end
 
       it "should regex match" do
@@ -292,7 +292,7 @@ describe Typhoeus::HydraMock do
                                         :user_agent => 'test')
         mock = Typhoeus::HydraMock.new(/fdsa/, :get,
                                        :headers => { 'user-agent' => 'test' })
-        mock.matches?(request).should be_true
+        expect(mock.matches?(request)).to eq(true)
       end
     end
   end

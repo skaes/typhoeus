@@ -8,13 +8,13 @@ describe Typhoeus::Easy do
     end
 
     it "should return true if the version string has zlib" do
-      @easy.stub(:curl_version).and_return("libcurl/7.20.0 OpenSSL/0.9.8l zlib/1.2.3 libidn/1.16")
-      @easy.supports_zlib?.should be_true
+      allow(@easy).to receive(:curl_version).and_return("libcurl/7.20.0 OpenSSL/0.9.8l zlib/1.2.3 libidn/1.16")
+      expect(@easy.supports_zlib?).to eq(true)
     end
 
     it "should return false if the version string doesn't have zlib" do
-      @easy.stub(:curl_version).and_return("libcurl/7.20.0 OpenSSL/0.9.8l libidn/1.16")
-      @easy.supports_zlib?.should be_false
+      allow(@easy).to receive(:curl_version).and_return("libcurl/7.20.0 OpenSSL/0.9.8l libidn/1.16")
+      expect(@easy.supports_zlib?).to eq(false)
     end
   end
 
@@ -25,9 +25,9 @@ describe Typhoeus::Easy do
       e.method = :get
       e.timeout = 100
       e.perform
-      e.curl_return_code.should == 28
-      e.curl_error_message.should == "Timeout was reached"
-      e.response_code.should == 0
+      expect(e.curl_return_code).to eq(28)
+      expect(e.curl_error_message).to eq("Timeout was reached")
+      expect(e.response_code).to eq(0)
     end
 
     it "should provide the CURLE_COULDNT_CONNECT return code when trying to connect to a non existent port" do
@@ -36,20 +36,20 @@ describe Typhoeus::Easy do
       e.method = :get
       e.connect_timeout = 100
       e.perform
-      e.curl_return_code.should == 7
-      e.curl_error_message.should == "Couldn't connect to server"
-      e.response_code.should == 0
+      expect(e.curl_return_code).to eq(7)
+      expect(e.curl_error_message).to eq("Couldn't connect to server")
+      expect(e.response_code).to eq(0)
     end
 
     it "should not return an error message on a successful easy operation" do
       easy = Typhoeus::Easy.new
       easy.url    = "http://localhost:3002"
       easy.method = :get
-      easy.curl_error_message.should == nil
+      expect(easy.curl_error_message).to eq(nil)
       easy.perform
-      easy.response_code.should == 200
-      easy.curl_return_code.should == 0
-      easy.curl_error_message.should == "No error"
+      expect(easy.response_code).to eq(200)
+      expect(easy.curl_return_code).to eq(0)
+      expect(easy.curl_error_message).to eq("No error")
     end
 
   end
@@ -60,7 +60,7 @@ describe Typhoeus::Easy do
       e.url = "http://localhost:3001/redirect"
       e.method = :get
       e.perform
-      e.response_code.should == 302
+      expect(e.response_code).to eq(302)
     end
 
     it "should allow for following redirects" do
@@ -69,8 +69,8 @@ describe Typhoeus::Easy do
       e.method = :get
       e.follow_location = true
       e.perform
-      e.response_code.should == 200
-      JSON.parse(e.response_body)["REQUEST_METHOD"].should == "GET"
+      expect(e.response_code).to eq(200)
+      expect(JSON.parse(e.response_body)["REQUEST_METHOD"]).to eq("GET")
     end
 
     it "should allow you to set the user agent" do
@@ -79,8 +79,8 @@ describe Typhoeus::Easy do
       easy.method = :get
       easy.user_agent = "myapp"
       easy.perform
-      easy.response_code.should == 200
-      JSON.parse(easy.response_body)["HTTP_USER_AGENT"].should == "myapp"
+      expect(easy.response_code).to eq(200)
+      expect(JSON.parse(easy.response_body)["HTTP_USER_AGENT"]).to eq("myapp")
     end
 
     it "should provide a timeout in milliseconds" do
@@ -91,8 +91,8 @@ describe Typhoeus::Easy do
       start_time = Time.now
       e.perform
       run_time = Time.now - start_time
-      e.timed_out?.should == true
-      run_time.should < 0.2
+      expect(e.timed_out?).to eq(true)
+      expect(run_time).to be < 0.2
     end
 
     it "should allow the setting of the max redirects to follow" do
@@ -102,7 +102,7 @@ describe Typhoeus::Easy do
       e.follow_location = true
       e.max_redirects = 5
       e.perform
-      e.response_code.should == 200
+      expect(e.response_code).to eq(200)
     end
 
     it "should handle our bad redirect action, provided we've set max_redirects properly" do
@@ -112,7 +112,7 @@ describe Typhoeus::Easy do
       e.follow_location = true
       e.max_redirects = 5
       e.perform
-      e.response_code.should == 302
+      expect(e.response_code).to eq(302)
     end
   end
   
@@ -124,7 +124,7 @@ describe Typhoeus::Easy do
       e.url = "http://localhost:3001/auth_basic/#{username}/#{password}"
       e.method = :get
       e.perform
-      e.response_code.should == 200
+      expect(e.response_code).to eq(200)
     end
     
     it "should allow to query auth methods support by the server" do
@@ -132,7 +132,7 @@ describe Typhoeus::Easy do
       e.url = "http://localhost:3001/auth_basic/foo/bar"
       e.method = :get
       e.perform
-      e.auth_methods.should == Typhoeus::Easy::AUTH_TYPES[:CURLAUTH_BASIC]
+      expect(e.auth_methods).to eq(Typhoeus::Easy::AUTH_TYPES[:CURLAUTH_BASIC])
     end
 
     it "should allow to set authentication method" do
@@ -141,7 +141,7 @@ describe Typhoeus::Easy do
       e.url = "http://localhost:3001/auth_ntlm"
       e.method = :get
       e.perform
-      e.response_code.should == 200
+      expect(e.response_code).to eq(200)
     end
   end
   
@@ -151,15 +151,15 @@ describe Typhoeus::Easy do
       easy.url    = "http://localhost:3002"
       easy.method = :get
       easy.perform
-      easy.response_code.should == 200
-      JSON.parse(easy.response_body)["REQUEST_METHOD"].should == "GET"
+      expect(easy.response_code).to eq(200)
+      expect(JSON.parse(easy.response_body)["REQUEST_METHOD"]).to eq("GET")
     end
   end
 
   describe "purge" do
     it "should set custom request to purge" do
       easy = Typhoeus::Easy.new
-      easy.should_receive(:set_option).with(Typhoeus::Easy::OPTION_VALUES[:CURLOPT_CUSTOMREQUEST], "PURGE").once
+      expect(easy).to receive(:set_option).with(Typhoeus::Easy::OPTION_VALUES[:CURLOPT_CUSTOMREQUEST], "PURGE").once
       easy.method = :purge
     end
   end
@@ -170,7 +170,7 @@ describe Typhoeus::Easy do
       easy.url    = "http://localhost:3002"
       easy.method = :head
       easy.perform
-      easy.response_code.should == 200
+      expect(easy.response_code).to eq(200)
     end
   end
 
@@ -178,9 +178,9 @@ describe Typhoeus::Easy do
     it "should be get/settable" do
       time = Time.now
       easy = Typhoeus::Easy.new
-      easy.start_time.should be_nil
+      expect(easy.start_time).to be_nil
       easy.start_time = time
-      easy.start_time.should == time
+      expect(easy.start_time).to eq(time)
     end
   end
 
@@ -194,7 +194,7 @@ describe Typhoeus::Easy do
         :foo => 'bar',
         :username => ['dbalatero', 'dbalatero2']
       }
-      easy.url.should =~ /\?.*foo=bar&username=dbalatero&username=dbalatero2/
+      expect(easy.url).to match(/\?.*foo=bar&username=dbalatero&username=dbalatero2/)
     end
   end
 
@@ -205,8 +205,8 @@ describe Typhoeus::Easy do
       easy.url    = "http://localhost:3002"
       easy.method = :put
       easy.perform
-      easy.response_code.should == 200
-      JSON.parse(easy.response_body)["REQUEST_METHOD"].should == "PUT"
+      expect(easy.response_code).to eq(200)
+      expect(JSON.parse(easy.response_body)["REQUEST_METHOD"]).to eq("PUT")
     end
     
     it "should send a request body" do
@@ -215,8 +215,8 @@ describe Typhoeus::Easy do
       easy.method = :put
       easy.request_body = "this is a body!"
       easy.perform
-      easy.response_code.should == 200
-      easy.response_body.should include("this is a body!")
+      expect(easy.response_code).to eq(200)
+      expect(easy.response_body).to include("this is a body!")
     end
 
     it "should send a large request body" do
@@ -225,8 +225,8 @@ describe Typhoeus::Easy do
       easy.method = :put
       easy.request_body = "1" * 2000
       easy.perform
-      easy.response_code.should == 200
-      easy.response_body.should include("1" * 2000)
+      expect(easy.response_code).to eq(200)
+      expect(easy.response_body).to include("1" * 2000)
     end
 
     it "should be able perform put with empty bodies on the same easy handle" do
@@ -234,16 +234,16 @@ describe Typhoeus::Easy do
       easy.url    = "http://localhost:3002"
       easy.method = :put
       easy.perform
-      easy.response_code.should == 200
-      JSON.parse(easy.response_body)["REQUEST_METHOD"].should == "PUT"
+      expect(easy.response_code).to eq(200)
+      expect(JSON.parse(easy.response_body)["REQUEST_METHOD"]).to eq("PUT")
 
       easy.reset
 
       easy.url    = "http://localhost:3002"
       easy.method = :put
       easy.perform
-      easy.response_code.should == 200
-      JSON.parse(easy.response_body)["REQUEST_METHOD"].should == "PUT"
+      expect(easy.response_code).to eq(200)
+      expect(JSON.parse(easy.response_body)["REQUEST_METHOD"]).to eq("PUT")
     end
 
   end
@@ -254,8 +254,8 @@ describe Typhoeus::Easy do
       easy.url    = "http://localhost:3002"
       easy.method = :post
       easy.perform
-      easy.response_code.should == 200
-      JSON.parse(easy.response_body)["REQUEST_METHOD"].should == "POST"
+      expect(easy.response_code).to eq(200)
+      expect(JSON.parse(easy.response_body)["REQUEST_METHOD"]).to eq("POST")
     end
     
     it "should send a request body" do
@@ -264,8 +264,8 @@ describe Typhoeus::Easy do
       easy.method = :post
       easy.request_body = "this is a body!"
       easy.perform
-      easy.response_code.should == 200
-      easy.response_body.should include("this is a body!")
+      expect(easy.response_code).to eq(200)
+      expect(easy.response_body).to include("this is a body!")
     end
 
     it "should send a large request body" do
@@ -274,8 +274,8 @@ describe Typhoeus::Easy do
       easy.method = :post
       easy.request_body = "1" * 2000
       easy.perform
-      easy.response_code.should == 200
-      easy.response_body.should include("1" * 2000)
+      expect(easy.response_code).to eq(200)
+      expect(easy.response_body).to include("1" * 2000)
     end
 
     it "should handle params" do
@@ -284,8 +284,8 @@ describe Typhoeus::Easy do
       easy.method = :post
       easy.params = {:foo => "bar"}
       easy.perform
-      easy.response_code.should == 200
-      easy.response_body.should =~ /foo=bar/
+      expect(easy.response_code).to eq(200)
+      expect(easy.response_body).to match(/foo=bar/)
     end
 
     it "should use Content-Type: application/x-www-form-urlencoded for normal posts" do
@@ -297,8 +297,8 @@ describe Typhoeus::Easy do
       easy.perform
 
       request = JSON.parse(easy.response_body)
-      request['CONTENT_TYPE'].should == 'application/x-www-form-urlencoded'
-      request['rack.request.form_vars'].should == 'a=b&c=d&e%5Bf%5D%5Bg%5D=h'
+      expect(request['CONTENT_TYPE']).to eq('application/x-www-form-urlencoded')
+      expect(request['rack.request.form_vars']).to eq('a=b&c=d&e%5Bf%5D%5Bg%5D=h')
     end
 
     it "should properly encode values in the post body" do
@@ -310,9 +310,9 @@ describe Typhoeus::Easy do
       easy.perform
 
       request = JSON.parse(easy.response_body)
-      request['CONTENT_TYPE'].should == 'application/x-www-form-urlencoded'
+      expect(request['CONTENT_TYPE']).to eq('application/x-www-form-urlencoded')
 
-      request['rack.request.form_vars'].should == 'a=a%3Db%26c%0Ax+x&b=2'
+      expect(request['rack.request.form_vars']).to eq('a=a%3Db%26c%0Ax+x&b=2')
     end
 
     it "should set content length correctly for a utf-8 string" do
@@ -320,8 +320,8 @@ describe Typhoeus::Easy do
       easy = Typhoeus::Easy.new
       easy.url    = "http://localhost:3002"
       easy.method = :post
-      easy.should_receive(:set_option).with(Typhoeus::Easy::OPTION_VALUES[:CURLOPT_POSTFIELDSIZE], 55)
-      easy.should_receive(:set_option).with(Typhoeus::Easy::OPTION_VALUES[:CURLOPT_COPYPOSTFIELDS], body)
+      expect(easy).to receive(:set_option).with(Typhoeus::Easy::OPTION_VALUES[:CURLOPT_POSTFIELDSIZE], 55)
+      expect(easy).to receive(:set_option).with(Typhoeus::Easy::OPTION_VALUES[:CURLOPT_COPYPOSTFIELDS], body)
       easy.request_body = body
     end
 
@@ -331,17 +331,17 @@ describe Typhoeus::Easy do
       easy.method = :post
       easy.params = {:file => File.open(File.expand_path(File.dirname(__FILE__) + "/../fixtures/placeholder.txt"), "r")}
       easy.perform
-      easy.response_code.should == 200
+      expect(easy.response_code).to eq(200)
       result = JSON.parse(easy.response_body)
       
       { 'content-type' => 'text/plain',
         'filename' => 'placeholder.txt',
         'content' => 'This file is used to test uploading.'
       }.each do |key, val|
-        result[key].should == val
+        expect(result[key]).to eq(val)
       end
 
-      result['request-content-type'].should =~ /multipart/
+      expect(result['request-content-type']).to match(/multipart/)
     end
 
     it "should not encode parameters when multipart" do
@@ -350,9 +350,9 @@ describe Typhoeus::Easy do
       easy.method = :post
       easy.params = {:other => "abc def", :file => File.open(File.expand_path(File.dirname(__FILE__) + "/../fixtures/placeholder.txt"), "r")}
       easy.perform
-      easy.response_code.should == 200
+      expect(easy.response_code).to eq(200)
       result = JSON.parse(easy.response_body)
-      result['other'].should == 'abc def'
+      expect(result['other']).to eq('abc def')
     end
   end
   
@@ -362,8 +362,8 @@ describe Typhoeus::Easy do
       easy.url    = "http://localhost:3002"
       easy.method = :delete
       easy.perform
-      easy.response_code.should == 200
-      JSON.parse(easy.response_body)["REQUEST_METHOD"].should == "DELETE"
+      expect(easy.response_code).to eq(200)
+      expect(JSON.parse(easy.response_body)["REQUEST_METHOD"]).to eq("DELETE")
     end
     
     it "should send a request body" do
@@ -372,8 +372,8 @@ describe Typhoeus::Easy do
       easy.method = :delete
       easy.request_body = "this is a body!"
       easy.perform
-      easy.response_code.should == 200
-      easy.response_body.should include("this is a body!")
+      expect(easy.response_code).to eq(200)
+      expect(easy.response_body).to include("this is a body!")
     end
   end
   
@@ -384,8 +384,8 @@ describe Typhoeus::Easy do
       easy.url = "http://localhost:3002/gzipped"
       easy.method = :get
       easy.perform
-      easy.response_code.should == 200
-      JSON.parse(easy.response_body)["HTTP_ACCEPT_ENCODING"].should == "deflate, gzip"
+      expect(easy.response_code).to eq(200)
+      expect(JSON.parse(easy.response_body)["HTTP_ACCEPT_ENCODING"]).to eq("deflate, gzip")
     end
 
     it "should send valid encoding headers and decode the response after reset" do
@@ -394,8 +394,8 @@ describe Typhoeus::Easy do
       easy.url = "http://localhost:3002/gzipped"
       easy.method = :get
       easy.perform
-      easy.response_code.should == 200
-      JSON.parse(easy.response_body)["HTTP_ACCEPT_ENCODING"].should == "deflate, gzip"
+      expect(easy.response_code).to eq(200)
+      expect(JSON.parse(easy.response_body)["HTTP_ACCEPT_ENCODING"]).to eq("deflate, gzip")
     end
     
   end

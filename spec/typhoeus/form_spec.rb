@@ -7,8 +7,8 @@ describe Typhoeus::Form do
         :name => "John Smith",
         :age => "29"
       })
-      form.should_receive(:formadd_param).with("name", "John+Smith")
-      form.should_receive(:formadd_param).with("age", "29")
+      expect(form).to receive(:formadd_param).with("name", "John+Smith")
+      expect(form).to receive(:formadd_param).with("age", "29")
       form.process!
     end
 
@@ -22,11 +22,11 @@ describe Typhoeus::Form do
         :name => "John Smith",
         :age => "29"
       })
-      form.should_receive(:formadd_param).with("attributes%5Beyes%5D", "brown")
-      form.should_receive(:formadd_param).with("attributes%5Bhair%5D", "green")
-      form.should_receive(:formadd_param).with("attributes%5Bteeth%5D", "white")
-      form.should_receive(:formadd_param).with("name", "John+Smith")
-      form.should_receive(:formadd_param).with("age", "29")
+      expect(form).to receive(:formadd_param).with("attributes%5Beyes%5D", "brown")
+      expect(form).to receive(:formadd_param).with("attributes%5Bhair%5D", "green")
+      expect(form).to receive(:formadd_param).with("attributes%5Bteeth%5D", "white")
+      expect(form).to receive(:formadd_param).with("name", "John+Smith")
+      expect(form).to receive(:formadd_param).with("age", "29")
       form.process!
     end
 
@@ -36,11 +36,11 @@ describe Typhoeus::Form do
         :name => "John Smith",
         :age => "29"
       })
-      form.should_receive(:formadd_param).with("colors", "brown")
-      form.should_receive(:formadd_param).with("colors", "green")
-      form.should_receive(:formadd_param).with("colors", "white")
-      form.should_receive(:formadd_param).with("name", "John+Smith")
-      form.should_receive(:formadd_param).with("age", "29")
+      expect(form).to receive(:formadd_param).with("colors", "brown")
+      expect(form).to receive(:formadd_param).with("colors", "green")
+      expect(form).to receive(:formadd_param).with("colors", "white")
+      expect(form).to receive(:formadd_param).with("name", "John+Smith")
+      expect(form).to receive(:formadd_param).with("age", "29")
       form.process!
     end
 
@@ -49,7 +49,7 @@ describe Typhoeus::Form do
         form = Typhoeus::Form.new(
           :file => File.open(File.expand_path(File.dirname(__FILE__) + "/../fixtures/placeholder.txt"), "r")
         )
-        form.should_receive(:formadd_file).with("file", "placeholder.txt", "text/plain", anything)
+        expect(form).to receive(:formadd_file).with("file", "placeholder.txt", "text/plain", anything)
         form.process!
       end
 
@@ -58,8 +58,8 @@ describe Typhoeus::Form do
           :text_file => File.open(File.expand_path(File.dirname(__FILE__) + "/../fixtures/placeholder.txt"), "r"),
           :gif_file => File.open(File.expand_path(File.dirname(__FILE__) + "/../fixtures/placeholder.gif"), "r")
         )
-        form.should_receive(:formadd_file).with("gif_file", "placeholder.gif", "image/gif", anything)
-        form.should_receive(:formadd_file).with("text_file", "placeholder.txt", "text/plain", anything)
+        expect(form).to receive(:formadd_file).with("gif_file", "placeholder.gif", "image/gif", anything)
+        expect(form).to receive(:formadd_file).with("text_file", "placeholder.txt", "text/plain", anything)
         form.process!
       end
 
@@ -68,16 +68,16 @@ describe Typhoeus::Form do
         form = Typhoeus::Form.new(
           :file => tempfile
         )
-        form.should_receive(:formadd_file).with("file", File.basename(tempfile.path), "application/octet-stream", anything)
+        expect(form).to receive(:formadd_file).with("file", File.basename(tempfile.path), "application/octet-stream", anything)
         form.process!
       end
 
       it "should default to 'application/octet-stream' if no content type can be determined" do
-        pending
+        skip
         form = Typhoeus::Form.new(
           :file => File.open(File.expand_path(File.dirname(__FILE__) + "/../fixtures/placeholder.txt"), "r")
         )
-        form.should_receive(:formadd_file).with("file", "placeholder.ukn", "application/octet-stream", anything)
+        expect(form).to receive(:formadd_file).with("file", "placeholder.ukn", "application/octet-stream", anything)
         form.process!
       end
     end
@@ -89,7 +89,7 @@ describe Typhoeus::Form do
         :name => "John Smith",
         :age => "29"
       })
-      form.to_s.should == "age=29&name=John+Smith"
+      expect(form.to_s).to eq("age=29&name=John+Smith")
     end
 
     it "should handle params that are a hash" do
@@ -102,7 +102,7 @@ describe Typhoeus::Form do
         :name => "John Smith",
         :age => "29"
       })
-      form.to_s.should == "age=29&attributes%5Beyes%5D=brown&attributes%5Bhair%5D=green&attributes%5Bteeth%5D=white&name=John+Smith"
+      expect(form.to_s).to eq("age=29&attributes%5Beyes%5D=brown&attributes%5Bhair%5D=green&attributes%5Bteeth%5D=white&name=John+Smith")
     end
 
     it "should params that have multiple values" do
@@ -111,7 +111,7 @@ describe Typhoeus::Form do
         :name => "John Smith",
         :age => "29"
       })
-      form.to_s.should == "age=29&colors=brown&colors=green&colors=white&name=John+Smith"
+      expect(form.to_s).to eq("age=29&colors=brown&colors=green&colors=white&name=John+Smith")
     end
   end
 end

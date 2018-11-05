@@ -2,7 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe Typhoeus do
   it "should be deprecated" do
-    pending "This entire interface is deprecated!"
+    skip "This entire interface is deprecated!"
   end
 
   # before(:each) do

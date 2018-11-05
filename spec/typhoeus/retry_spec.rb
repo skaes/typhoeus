@@ -15,9 +15,9 @@ describe Typhoeus::Request do
       some_value = false
       request = Typhoeus::Request.new('url')
       request.on_retry{ some_value = true }
-      request.instance_eval{ @on_retry }.should be_a_kind_of(Proc)
+      expect(request.instance_eval{ @on_retry }).to be_a_kind_of(Proc)
       request.instance_eval{ @on_retry }.call
-      some_value.should == true
+      expect(some_value).to eq(true)
     end
   end
 
@@ -27,7 +27,7 @@ describe Typhoeus::Request do
       request = Typhoeus::Request.new('url')
       retry_proc = proc{ some_value = true }
       request.on_retry = retry_proc
-      request.instance_eval{ @on_retry }.should == retry_proc
+      expect(request.instance_eval{ @on_retry }).to eq(retry_proc)
     end
   end
 
@@ -39,8 +39,8 @@ describe Typhoeus::Request do
       request = Typhoeus::Request.new('url')
       request.on_retry{|rsp| response_for_request = rsp; some_value = true }
       request.call_retry_handler(response)
-      some_value.should == true
-      response_for_request.should == response
+      expect(some_value).to eq(true)
+      expect(response_for_request).to eq(response)
     end
   end
 end
@@ -48,19 +48,19 @@ end
 describe Typhoeus::Hydra do
   describe '#retry_codes' do
     it 'should be empty by default' do
-      Typhoeus::Hydra.new.retry_codes.should == []
+      expect(Typhoeus::Hydra.new.retry_codes).to eq([])
     end
 
     it 'should reflect the value of @retry_codes' do
       hydra = Typhoeus::Hydra.new
       hydra.instance_eval{@retry_codes = [503, 504]}
-      hydra.retry_codes.should == [503, 504]
+      expect(hydra.retry_codes).to eq([503, 504])
     end
   end
 
   describe '.new' do
     it 'should set the retry_codes with the :retry_codes option' do
-      Typhoeus::Hydra.new(:retry_codes => [505, 506]).retry_codes.should == [505, 506]
+      expect(Typhoeus::Hydra.new(:retry_codes => [505, 506]).retry_codes).to eq([505, 506])
     end
   end
 
@@ -69,7 +69,7 @@ describe Typhoeus::Hydra do
       hydra = Typhoeus::Hydra.new(:retry_codes => [507, 508])
       hydra.disable_retry
 
-      hydra.retry_codes.should == []
+      expect(hydra.retry_codes).to eq([])
     end
   end
 
@@ -78,7 +78,7 @@ describe Typhoeus::Hydra do
       hydra = Typhoeus::Hydra.new
       hydra.retry_codes = [509, 510]
 
-      hydra.retry_codes.should == [509, 510]
+      expect(hydra.retry_codes).to eq([509, 510])
     end
   end
 
@@ -96,7 +96,7 @@ describe Typhoeus::Hydra do
       @hydra.cache_setter do |request|
         raise 'should get here'
         if :get == request.method
-          [503, 504].should_not include(request.response.code)
+          expect([503, 504]).not_to include(request.response.code)
         end
         @cache[request.object_id] = request.response
       end
@@ -117,10 +117,10 @@ describe Typhoeus::Hydra do
       it 'calls should not be retried' do
         Typhoeus::Request.get("#{@flaky_prefix}/set?codes=503,200")
         response = Typhoeus::Request.get("#{@flaky_prefix}?sanity-server-flip")
-        response.code.should == 503
+        expect(response.code).to eq(503)
 
         response = Typhoeus::Request.get("#{@flaky_prefix}?sanity-server-flip")
-        response.code.should == 200
+        expect(response.code).to eq(200)
       end
     end
 
@@ -135,11 +135,11 @@ describe Typhoeus::Hydra do
             Typhoeus::Request.get("#{@flaky_prefix}/set?codes=503,200")
             response = Typhoeus::Request.get("#{@flaky_prefix}?sanity-server-flip",
                                              :retry => false)
-            response.code.should == 503
+            expect(response.code).to eq(503)
 
             response = Typhoeus::Request.get("#{@flaky_prefix}?sanity-server-flip",
                                              :retry => false)
-            response.code.should == 200
+            expect(response.code).to eq(200)
           end
 
           it "it should return 503 multiple times if needed" do
@@ -147,15 +147,15 @@ describe Typhoeus::Hydra do
 
             response = Typhoeus::Request.get("#{@flaky_prefix}?sanity-server-list",
                                              :retry => false)
-            response.code.should == 503
+            expect(response.code).to eq(503)
 
             response = Typhoeus::Request.get("#{@flaky_prefix}?sanity-server-list",
                                              :retry => false)
-            response.code.should == 503
+            expect(response.code).to eq(503)
 
             response = Typhoeus::Request.get("#{@flaky_prefix}?sanity-server-list",
                                              :retry => false)
-            response.code.should == 200
+            expect(response.code).to eq(200)
           end
         end
       end
@@ -169,13 +169,13 @@ describe Typhoeus::Hydra do
                 Typhoeus::Request.get("#{@flaky_prefix}/set?codes=#{code},200")
                 request = Typhoeus::Request.new("#{@flaky_prefix}?single-#{code}-success",
                                                 :method => method)
-                request.on_retry {|rsp| retry_count += 1;  rsp.code.should == code }
+                request.on_retry {|rsp| retry_count += 1;  expect(rsp.code).to eq(code) }
                 request.cache_timeout = @cache_timeout
                 @hydra.queue request
                 @hydra.run
 
-                request.response.code.should == 200
-                retry_count.should == 1
+                expect(request.response.code).to eq(200)
+                expect(retry_count).to eq(1)
               end
 
               it "should result in exception with multiple #{method} yielding #{code} responses" do
@@ -186,7 +186,7 @@ describe Typhoeus::Hydra do
                 @hydra.queue request
                 @hydra.run
 
-                request.response.code.should == code
+                expect(request.response.code).to eq(code)
               end
             end
           end
@@ -207,20 +207,20 @@ describe Typhoeus::Hydra do
                 request1 = Typhoeus::Request.new("#{@flaky_prefix}?multi-request",
                                                  :method => method)
                 request1.on_complete { callback_count += 1 }
-                request1.on_retry {|rsp| retry_count += 1;  rsp.code.should == code }
+                request1.on_retry {|rsp| retry_count += 1;  expect(rsp.code).to eq(code) }
                 request1.cache_timeout = @cache_timeout
                 request2 = Typhoeus::Request.new("#{@flaky_prefix}?multi-request",
                                                  :method => method)
                 request2.on_complete { callback_count += 1 }
-                request2.on_retry {|rsp| retry_count += 1;  rsp.code.should == code }
+                request2.on_retry {|rsp| retry_count += 1;  expect(rsp.code).to eq(code) }
                 request1.cache_timeout = @cache_timeout
                 @hydra.queue request1
                 @hydra.queue request2
                 @hydra.run
-                callback_count.should == 2
-                retry_count.should == 1
-                request1.response.code.should == 200
-                request2.response.code.should == 200
+                expect(callback_count).to eq(2)
+                expect(retry_count).to eq(1)
+                expect(request1.response.code).to eq(200)
+                expect(request2.response.code).to eq(200)
               end
             end
           end
@@ -247,8 +247,8 @@ describe Typhoeus::Hydra do
 
                 @hydra.run
 
-                request.response.code.should == code
-                retry_count.should == 0
+                expect(request.response.code).to eq(code)
+                expect(retry_count).to eq(0)
               end
             end
           end

@@ -9,27 +9,27 @@ describe Typhoeus::Filter do
   describe "#apply_filter?" do
     it "should return true for any method when :only and :except aren't specified" do
       filter = Typhoeus::Filter.new(:bar)
-      filter.apply_filter?(:asdf).should be_true
+      expect(filter.apply_filter?(:asdf)).to eq(true)
     end
     
     it "should return true if a method is in only" do
       filter = Typhoeus::Filter.new(:bar, :only => :foo)
-      filter.apply_filter?(:foo).should be_true
+      expect(filter.apply_filter?(:foo)).to eq(true)
     end
     
     it "should return false if a method isn't in only" do
       filter = Typhoeus::Filter.new(:bar, :only => :foo)
-      filter.apply_filter?(:bar).should be_false
+      expect(filter.apply_filter?(:bar)).to eq(false)
     end
     
     it "should return true if a method isn't in except" do
       filter = Typhoeus::Filter.new(:bar, :except => :foo)
-      filter.apply_filter?(:bar).should be_true
+      expect(filter.apply_filter?(:bar)).to eq(true)
     end
     
     it "should return false if a method is in except" do
       filter = Typhoeus::Filter.new(:bar, :except => :foo)
-      filter.apply_filter?(:foo).should be_false
+      expect(filter.apply_filter?(:foo)).to eq(false)
     end
   end
 end

@@ -9,28 +9,28 @@ describe Typhoeus::RemoteProxyObject do
   
   it "should take a caller and call the clear_memoized_proxy_objects" do
     clear_proxy = lambda {}
-    clear_proxy.should_receive(:call)
+    expect(clear_proxy).to receive(:call)
     response = Typhoeus::RemoteProxyObject.new(clear_proxy, @easy)
-    response.code.should == 200
+    expect(response.code).to eq(200)
   end
 
   it "should take an easy object and return the body when requested" do
     response = Typhoeus::RemoteProxyObject.new(lambda {}, @easy)
-    @easy.response_code.should == 0
-    response.code.should == 200
+    expect(@easy.response_code).to eq(0)
+    expect(response.code).to eq(200)
   end
   
   it "should perform requests only on the first access" do
     response = Typhoeus::RemoteProxyObject.new(lambda {}, @easy)
-    response.code.should == 200
-    Typhoeus.should_receive(:perform_easy_requests).exactly(0).times
-    response.code.should == 200
+    expect(response.code).to eq(200)
+    expect(Typhoeus).to receive(:perform_easy_requests).exactly(0).times
+    expect(response.code).to eq(200)
   end
 
   it "should set the requested_url and requested_http_method on the response" do
     response = Typhoeus::RemoteProxyObject.new(lambda {}, @easy)
-    response.requested_url.should == "http://localhost:3001"
-    response.requested_http_method.should == :get
+    expect(response.requested_url).to eq("http://localhost:3001")
+    expect(response.requested_http_method).to eq(:get)
   end
   
   it "should call the on_success method with an easy object and proxy to the result of on_success" do
@@ -45,7 +45,7 @@ describe Typhoeus::RemoteProxyObject do
     end
     
     k = Typhoeus::RemoteProxyObject.new(lambda {}, @easy, :on_success => lambda {|e| klass.new(e)})
-    k.blah.should == 200
+    expect(k.blah).to eq(200)
   end
   
   it "should call the on_failure method with an easy object and proxy to the result of on_failure" do
@@ -60,6 +60,6 @@ describe Typhoeus::RemoteProxyObject do
     end
     @easy.url = "http://localhost:3005" #bad port
     k = Typhoeus::RemoteProxyObject.new(lambda {}, @easy, :on_failure => lambda {|e| klass.new(e)})
-    k.blah.should == 0
+    expect(k.blah).to eq(0)
   end
 end

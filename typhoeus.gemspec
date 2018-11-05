@@ -25,7 +25,7 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency "mime-types"
 
-  gem.add_development_dependency "rake", "~> 10.5"
+  gem.add_development_dependency "rake"
   gem.add_development_dependency "rspec", "~> 3.8.0"
   gem.add_development_dependency "sinatra"
   gem.add_development_dependency "json"

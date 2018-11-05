@@ -426,7 +426,7 @@ Running the specs requires the native extensions to be built and a couple of Sin
   # Make sure to build the native extensions
   bundle exec rake compile
   # Start up the test servers (in another terminal)
-  bundle exec start_test_servers
+  bundle exec rake start_test_servers
 
   # Run the specs
   bundle exec rake spec

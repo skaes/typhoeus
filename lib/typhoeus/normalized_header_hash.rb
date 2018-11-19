@@ -21,6 +21,7 @@ module Typhoeus
     end
 
     @@convert_key_cache = Cache.new(MAX_CACHED)
+    @@convert_key_mutex = Mutex.new
 
     def initialize(constructor = {})
       if constructor.is_a?(Hash)
@@ -74,8 +75,11 @@ module Typhoeus
 
   private
     def convert_key(key)
-      @@convert_key_cache.fetch(key) do
-        @@convert_key_cache[key] = key.to_s.tr('_'.freeze,'-'.freeze).split('-'.freeze).map! { |segment| segment.capitalize }.join('-'.freeze)
+      @@convert_key_mutex.synchronize do
+        @@convert_key_cache.fetch(key) do
+          @@convert_key_cache[key] =
+            key.to_s.tr('_'.freeze,'-'.freeze).split('-'.freeze).map! { |segment| segment.capitalize }.join('-'.freeze)
+        end
       end
     end
   end

@@ -10,8 +10,8 @@ module Typhoeus
       end
 
       def []=(key, val)
+        @hash.shift while @hash.length >= @size
         @hash[key] = val
-        @hash.shift if @hash.length > @size
         val
       end
 

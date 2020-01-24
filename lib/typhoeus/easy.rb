@@ -32,6 +32,7 @@ module Typhoeus
       :CURLOPT_PROXYUSERPWD   => 10000 + 6,
       :CURLOPT_PROXYTYPE      => 101,
       :CURLOPT_PROXYAUTH      => 111,
+      :CURLOPT_IPRESOLVE      => 113,
       :CURLOPT_VERIFYPEER     => 64,
       :CURLOPT_VERIFYHOST    => 81,
       :CURLOPT_NOBODY         => 44,
@@ -44,6 +45,7 @@ module Typhoeus
       :CURLOPT_CAINFO         => 10065,
       :CURLOPT_CAPATH         => 10097,
     }
+
     INFO_VALUES = {
       :CURLINFO_RESPONSE_CODE      => 2097154,
       :CURLINFO_TOTAL_TIME         => 3145731,
@@ -72,6 +74,11 @@ module Typhoeus
       :CURLPROXY_SOCKS4A      => 6,
     }
 
+    IPRESOLVE_PROTOCOLS = {
+      :CURL_IPRESOLVE_WHATEVER => 0,
+      :CURL_IPRESOLVE_V4       => 1,
+      :CURL_IPRESOLVE_V6       => 2,
+    }
 
     def initialize
       @method = :get
@@ -97,6 +104,10 @@ module Typhoeus
     def proxy=(proxy)
       set_option(OPTION_VALUES[:CURLOPT_PROXY], proxy[:server])
       set_option(OPTION_VALUES[:CURLOPT_PROXYTYPE], proxy[:type]) if proxy[:type]
+    end
+
+    def ipresolve=(protocol)
+      set_option(OPTION_VALUES[:CURLOPT_IPRESOLVE], IPRESOLVE_PROTOCOLS[protocol])
     end
 
     def proxy_auth=(authinfo)

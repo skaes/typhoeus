@@ -11,7 +11,7 @@ module Typhoeus
                   :ssl_cert, :ssl_cert_type, :ssl_key, :ssl_key_type,
                   :ssl_key_password, :ssl_cacert, :ssl_capath, :verbose,
                   :username, :password, :auth_method, :user_agent,
-                  :proxy_auth_method, :proxy_type, :attempt_retry, :performed
+                  :proxy_auth_method, :proxy_type, :ipresolve, :attempt_retry, :performed
 
     alias_method :performed?, :performed
 
@@ -32,6 +32,7 @@ module Typhoeus
     # ** +:follow_location
     # ** +:max_redirects
     # ** +:proxy
+    # ** +:ipresolve : protocol to use for hostname resolution
     # ** +:disable_ssl_peer_verification
     # ** +:disable_ssl_host_verification
     # ** +:ssl_cert
@@ -61,6 +62,7 @@ module Typhoeus
       @max_redirects    = options[:max_redirects]
       @proxy            = options[:proxy]
       @proxy_type       = options[:proxy_type]
+      @ipresolve        = options[:ipresolve]
       @proxy_username   = options[:proxy_username]
       @proxy_password   = options[:proxy_password]
       @proxy_auth_method = options[:proxy_auth_method]

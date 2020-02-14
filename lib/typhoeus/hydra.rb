@@ -188,6 +188,7 @@ module Typhoeus
       easy.interface       = request.interface if request.interface
       easy.follow_location = request.follow_location if request.follow_location
       easy.max_redirects = request.max_redirects if request.max_redirects
+      easy.ipresolve        = request.ipresolve if request.ipresolve
       easy.disable_ssl_peer_verification if request.disable_ssl_peer_verification
       easy.disable_ssl_host_verification if request.disable_ssl_host_verification
       easy.ssl_cert         = request.ssl_cert

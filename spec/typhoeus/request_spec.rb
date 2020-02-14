@@ -250,7 +250,8 @@ describe Typhoeus::Request do
 
     it "should have app connect time" do
       response = Typhoeus::Request.get("http://localhost:3000")
-      response.app_connect_time.should  > 0
+      # starting with versin 7.67.0 app_connect_time is 0 for non-ssl connections
+      response.app_connect_time.should >= 0
     end
 
     it "should have start transfer time" do

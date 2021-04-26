@@ -1,11 +1,11 @@
 #!/usr/bin/env ruby
-# go to ext/typhoeus and run ruby extconf.rb && make before running
+# go to ext/xingfus and run ruby extconf.rb && make before running
 # this.
 
 $LOAD_PATH.unshift(File.dirname(__FILE__) + "/../ext")
-require File.dirname(__FILE__) + "/../lib/typhoeus"
+require File.dirname(__FILE__) + "/../lib/xingfus"
 
-klass = Class.new { include Typhoeus }
+klass = Class.new { include Xingfus }
 
 loops = ENV['LOOPS'].to_i
 url = ARGV.first || (raise "requires URL!")

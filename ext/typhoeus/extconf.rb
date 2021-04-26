@@ -54,4 +54,4 @@ elsif !found
   find_library('curl', 'curl_easy_init', LIBDIR, '/usr/local/lib', '/usr/lib')
 end
 
-create_makefile("typhoeus/native")
+create_makefile("xingfus/native")

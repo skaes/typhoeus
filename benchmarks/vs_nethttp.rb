@@ -1,5 +1,5 @@
 require 'rubygems'
-require File.dirname(__FILE__) + '/../lib/typhoeus.rb'
+require File.dirname(__FILE__) + '/../lib/xingfus.rb'
 require 'open-uri'
 require 'benchmark'
 include Benchmark
@@ -7,10 +7,10 @@ include Benchmark
 
 calls = 20
 @klass = Class.new do
-  include Typhoeus
+  include Xingfus
 end
 
-Typhoeus.init_easy_object_pool
+Xingfus.init_easy_object_pool
 
 benchmark do |t|    
   t.report("net::http") do
@@ -23,7 +23,7 @@ benchmark do |t|
     responses.each {|r| raise unless r == "whatever"}    
   end
   
-  t.report("typhoeus") do
+  t.report("xingfus") do
     responses = []
     
     calls.times do |i|

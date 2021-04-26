@@ -1,9 +1,9 @@
 require 'rubygems'
-require File.dirname(__FILE__) + '/../lib/typhoeus.rb'
+require File.dirname(__FILE__) + '/../lib/xingfus.rb'
 require 'json'
 
 class Twitter
-  include Typhoeus
+  include Xingfus
   remote_defaults :on_success => lambda {|response| JSON.parse(response.body)},
                   :on_failure => lambda {|response| puts "error code: #{response.code}"},
                   :base_uri   => "http://search.twitter.com"

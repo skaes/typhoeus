@@ -1,6 +1,6 @@
-require File.dirname(__FILE__) + '/../lib/typhoeus.rb'
+require File.dirname(__FILE__) + '/../lib/xingfus.rb'
 
-hydra = Typhoeus::Hydra.new
+hydra = Xingfus::Hydra.new
 hydra.disable_memoization
 
 urls = [
@@ -13,7 +13,7 @@ urls = [
 10.times {
     |i|
 
-    req = Typhoeus::Request.new( urls[ i % urls.size] )
+    req = Xingfus::Request.new(urls[i % urls.size] )
     req.on_complete {
         |res|
         puts 'URL:     ' + res.effective_url

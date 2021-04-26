@@ -2,17 +2,17 @@
 lib = File.expand_path('../lib/', __FILE__)
 $:.unshift lib unless $:.include?(lib)
 
-require "typhoeus/version"
+require "xingfus/version"
 
 Gem::Specification.new do |gem|
-  gem.name        = "typhoeus"
+  gem.name        = "xingfus"
   gem.authors     = ["Stefan Kaes", "Larry Baltz", "Mark Schmidt", "Sebastian Röbke", "Paul Dix", "David Balatero"]
   gem.email       = ["stefan.kaes@xing.com", "larry.baltz@xing.com", "mark.schmidt@xing.com", "sebastian.roebke@xing.com"]
-  gem.description = "Like a modern code version of the mythical beast with 100 serpent heads, Typhoeus runs HTTP requests in parallel while cleanly encapsulating handling logic."
+  gem.description = "Like a modern code version of the mythical beast with 100 serpent heads, Xingfus runs HTTP requests in parallel while cleanly encapsulating handling logic."
   gem.summary     = "A library for interacting with web services (and building SOAs) at blinding speed. XING fork."
-  gem.homepage    = "https://github.com/xing/typhoeus"
+  gem.homepage    = "https://github.com/xing/xingfus"
   gem.license     = "MIT"
-  gem.version     = Typhoeus::VERSION
+  gem.version     = Xingfus::VERSION
 
   gem.extensions    = ["ext/typhoeus/extconf.rb"]
   gem.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }

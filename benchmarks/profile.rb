@@ -1,13 +1,13 @@
-require File.dirname(__FILE__) + '/../lib/typhoeus.rb'
+require File.dirname(__FILE__) + '/../lib/xingfus.rb'
 require 'rubygems'
 require 'ruby-prof'
 
 calls = 20
 @klass = Class.new do
-  include Typhoeus
+  include Xingfus
 end
 
-Typhoeus.init_easy_objects
+Xingfus.init_easy_objects
 
 RubyProf.start
 
